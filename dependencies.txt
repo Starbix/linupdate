@@ -1,0 +1,4 @@
+# packages to install :
+
+apt install python3-tabulate
+apt install python3-colorama

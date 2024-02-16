@@ -411,11 +411,6 @@ function mod_configure
                 getServerConf
                 clean_exit
             ;;
-            # --get-profile-conf|--profile-get-conf)
-            #     getModConf
-            #     getProfileConf
-            #     clean_exit
-            # ;;
             --get-profile-packages-conf)
                 getModConf
                 getProfilePackagesConf
@@ -727,68 +722,6 @@ function preCheck
     fi
 }
 
-# Get profile general configuration from reposerver
-# function getProfileConf
-# {
-#     # Si le serveur reposerver ne gère pas les profils ou que le client refuse d'être mis à jour par son serveur de repo, on quitte la fonction
-#     echo -ne "  → Getting ${YELLOW}${PROFILE}${RESET} profile configuration: "
-
-#     # Demande de la configuration des repos auprès du serveur de repos
-#     # Ce dernier renverra la configuration au format JSON
-#     CURL=$(curl -L --post301 -s -q -H "Authorization: Host $HOST_ID:$TOKEN" -X GET "${REPOSERVER_URL}/api/v2/profile/${PROFILE}" 2> /dev/null)
-#     curl_result_parse
-
-#     # Si il y a eu une erreur lors de la requête on quitte la fonction
-#     if [ "$CURL_ERROR" != "0" ];then
-#         return 2
-#     fi
-
-#     # Puis on récupère la configuration transmise par le serveur au format JSON
-#     # On parcourt chaque configuration et on récupère le nom du fichier à créer, la description et le contenu à insérer
-#     # On remplace à la volée l'environnement dans le contenu récupéré
-#     for ROW in $(echo "${CURL}" | jq -r '.results[] | @base64'); do
-#         _jq() {
-#             echo ${ROW} | base64 --decode | jq -r ${1}
-#         }
-
-#         GET_PROFILE_PKG_CONF_FROM_REPOSERVER=$(_jq '.Linupdate_get_pkg_conf')
-#         GET_PROFILE_REPOS_FROM_REPOSERVER=$(_jq '.Linupdate_get_repos_conf')
-#     done
-
-#     if [ "$GET_PROFILE_PKG_CONF_FROM_REPOSERVER" == "null" ];then
-#         echo -e "[$YELLOW ERROR $RESET] Server sent ${YELLOW}null${RESET} data"
-#         return 2
-#     fi
-
-#     if [ "$GET_PROFILE_REPOS_FROM_REPOSERVER" == "null" ];then
-#         echo -e "[$YELLOW ERROR $RESET] Server sent ${YELLOW}null${RESET} data"
-#         return 2
-#     fi
-
-#     # converting to boolean
-#     if [ "$GET_PROFILE_PKG_CONF_FROM_REPOSERVER" == "no" ];then
-#         GET_PROFILE_PKG_CONF_FROM_REPOSERVER="false"
-#     fi
-#     if [ "$GET_PROFILE_PKG_CONF_FROM_REPOSERVER" == "yes" ];then
-#         GET_PROFILE_PKG_CONF_FROM_REPOSERVER="true"
-#     fi
-#     if [ "$GET_PROFILE_REPOS_FROM_REPOSERVER" == "no" ];then
-#         GET_PROFILE_REPOS_FROM_REPOSERVER="false"
-#     fi
-#     if [ "$GET_PROFILE_REPOS_FROM_REPOSERVER" == "yes" ];then
-#         GET_PROFILE_REPOS_FROM_REPOSERVER="true"
-#     fi
-
-#     # On applique la nouvelle configuration récupérée
-#     sed -i "s/GET_PROFILE_PKG_CONF_FROM_REPOSERVER.*/GET_PROFILE_PKG_CONF_FROM_REPOSERVER=\"$GET_PROFILE_PKG_CONF_FROM_REPOSERVER\"/g" "$MOD_CONF"
-#     sed -i "s/GET_PROFILE_REPOS_FROM_REPOSERVER.*/GET_PROFILE_REPOS_FROM_REPOSERVER=\"$GET_PROFILE_REPOS_FROM_REPOSERVER\"/g" "$MOD_CONF"
-
-#     echo -e "[${GREEN} OK ${RESET}]"
-
-#     # Enfin on applique la nouvelle conf en récupérant de nouveau les paramètres du fichier de conf :
-#     getConf
-# }
-
 # Get profile packages configuratin (packages excludes)
 function getProfilePackagesConf
 {
@@ -971,12 +904,6 @@ function pre
     RESULT="$?"
     if [ "$FAILLEVEL" -eq "1" ] && [ "$RESULT" -gt "0" ];then (( MOD_ERROR++ )); clean_exit;fi
     if [ "$FAILLEVEL" -eq "2" ] && [ "$RESULT" -ge "2" ];then (( MOD_ERROR++ )); clean_exit;fi
-
-    # On met à jour notre configuration à partir du serveur de repo (profils), si cela est autorisé des deux côtés
-    # getProfileConf
-    # RESULT="$?"
-    # if [ "$FAILLEVEL" -eq "1" ] && [ "$RESULT" -gt "0" ];then (( MOD_ERROR++ )); clean_exit;fi
-    # if [ "$FAILLEVEL" -eq "2" ] && [ "$RESULT" -ge "2" ];then (( MOD_ERROR++ )); clean_exit;fi
 
     getProfilePackagesConf
     RESULT="$?"
