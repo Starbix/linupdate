@@ -25,9 +25,9 @@ class System:
     def check(self):
         # Check if the program is running on Linux
         if (platform.system() != 'Linux'):
-            print('This program only works on Linux')
-            exit(1)
+            raise Exception('This program only works on Linux')
      
+        # Check if the program is running on a supported Linux distribution (will raise an exception if not supported)
         self.getOsFamily()
     
 
@@ -37,7 +37,6 @@ class System:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def getOsFamily(self):
-        raise Exception('This program does not support your Linux distribution "' + distro.name() + '" yet.')
         if (distro.name() in ['Debian', 'Ubuntu', 'Kubuntu', 'Xubuntu', 'Linux Mint']):
             return 'Debian'
             

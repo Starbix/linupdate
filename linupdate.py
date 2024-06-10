@@ -113,7 +113,7 @@ def main():
             # TODO
 
     except Exception as e:
-        print(' ' + Fore.YELLOW + str(e) + Style.RESET_ALL)
+        print('\n' + Fore.RED + ' ✕ ' + Style.RESET_ALL + str(e) + '\n')
         myExit.cleanExit(1)
 
 # Run main function

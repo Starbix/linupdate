@@ -63,258 +63,341 @@ class Args:
         myModule    = Module()
         myExit      = Exit()
 
-        # Parse arguments
-        parser = argparse.ArgumentParser()
+        try:
+            # Parse arguments
+            parser = argparse.ArgumentParser()
 
-        # Define valid arguments
+            # Define valid arguments
 
-        # Version
-        parser.add_argument("-V", "--version", action="store_true", default="null", help="show program version")
-        # Verbosity
-        parser.add_argument("-v", "--verbosity", action="store_true", default="null", help="increase output verbosity")
-        # Force / assume-yes
-        parser.add_argument("-y", "--assume-yes", action="store_true", default="null", help="assume yes")
-        # Check updates
-        parser.add_argument("--check-updates", action="store_true", default="null", help="check updates")
-        # Ignore exclude
-        parser.add_argument("--ignore-exclude", action="store_true", default="null", help="ignore-exclude")
+            # Version
+            parser.add_argument("-V", "--version", action="store_true", default="null", help="show program version")
+            # Verbosity
+            parser.add_argument("-v", "--verbosity", action="store_true", default="null", help="increase output verbosity")
+            # Force / assume-yes
+            parser.add_argument("-y", "--assume-yes", action="store_true", default="null", help="assume yes")
+            # Check updates
+            parser.add_argument("--check-updates", action="store_true", default="null", help="check updates")
+            # Ignore exclude
+            parser.add_argument("--ignore-exclude", action="store_true", default="null", help="ignore-exclude")
 
-        # Profile
-        parser.add_argument("--profile", action="store", nargs='?', default="null", help="profile")
-        # Environment
-        parser.add_argument("--env", action="store", nargs='?', default="null", help="environment")
-        
-        # Dist upgrade
-        parser.add_argument("--dist-upgrade", action="store_true", default="null", help="dist-upgrade")
-        # Keep oldconf
-        parser.add_argument("--keep-oldconf", action="store_true", default="null", help="keep-oldconf")
+            # Profile
+            parser.add_argument("--profile", action="store", nargs='?', default="null", help="profile")
+            # Environment
+            parser.add_argument("--env", action="store", nargs='?', default="null", help="environment")
+            
+            # Dist upgrade
+            parser.add_argument("--dist-upgrade", action="store_true", default="null", help="dist-upgrade")
+            # Keep oldconf
+            parser.add_argument("--keep-oldconf", action="store_true", default="null", help="keep-oldconf")
 
-        # Get excluded packages
-        parser.add_argument("--get-exclude", action="store", nargs='?', default="null", help="Get excluded packages")
-        # Get excluded packages on major update
-        parser.add_argument("--get-exclude-major", action="store", nargs='?', default="null", help="Get excluded packages on major update")
-        # Get services to restart after package update
-        parser.add_argument("--get-service-restart", action="store", nargs='?', default="null", help="Get services to restart")
-        # Exclude
-        parser.add_argument("--exclude", action="store", nargs='?', default="null", help="exclude packages")
-        # Exclude on major update
-        parser.add_argument("--exclude-major", action="store", nargs='?', default="null", help="exclude packages on major update")
-        # Services to restart after package update
-        parser.add_argument("--service-restart", action="store", nargs='?', default="null", help="restart services")
+            # Get excluded packages
+            parser.add_argument("--get-exclude", action="store", nargs='?', default="null", help="Get excluded packages")
+            # Get excluded packages on major update
+            parser.add_argument("--get-exclude-major", action="store", nargs='?', default="null", help="Get excluded packages on major update")
+            # Get services to restart after package update
+            parser.add_argument("--get-service-restart", action="store", nargs='?', default="null", help="Get services to restart")
+            # Exclude
+            parser.add_argument("--exclude", action="store", nargs='?', default="null", help="exclude packages")
+            # Exclude on major update
+            parser.add_argument("--exclude-major", action="store", nargs='?', default="null", help="exclude packages on major update")
+            # Services to restart after package update
+            parser.add_argument("--service-restart", action="store", nargs='?', default="null", help="restart services")
 
-        # List modules
-        parser.add_argument("--mod-list", action="store_true", default="null", help="")
-        # Module enable
-        parser.add_argument("--mod-enable", action="store", nargs='?', default="null", help="enable module")
-        # Module disable
-        parser.add_argument("--mod-disable", action="store", nargs='?', default="null", help="disable module")
-        # Module configure
-        parser.add_argument("--mod-configure", action="store", nargs='?', default="null", help="configure module")
+            # List modules
+            parser.add_argument("--mod-list", action="store_true", default="null", help="")
+            # Module enable
+            parser.add_argument("--mod-enable", action="store", nargs='?', default="null", help="enable module")
+            # Module disable
+            parser.add_argument("--mod-disable", action="store", nargs='?', default="null", help="disable module")
+            # Module configure
+            parser.add_argument("--mod-configure", action="store", nargs='?', default="null", help="configure module")
 
-        # Parse arguments
-        args, unknown = parser.parse_known_args()
+            # Parse arguments
+            args, unknown = parser.parse_known_args()
 
-        #
-        # If --version param has been set
-        #
-        if args.version != "null":
-            if args.version:
-                print(' Current version: ' + myApp.getVersion())
-                myExit.cleanExit() 
+        except Exception as e:
+            raise Exception('Error while parsing arguments: ' + str(e))
 
-        #
-        # If --verbosity param has been set
-        #
-        if args.verbosity != "null":
-            Args.verbosity = True
+        try:
+            #
+            # If --version param has been set
+            #
+            if args.version != "null":
+                if args.version:
+                    print(' Current version: ' + myApp.getVersion())
+                    myExit.cleanExit() 
 
-        #
-        # If --assume-yes param has been set
-        #
-        if args.assume_yes != "null":
-            Args.assume_yes = True
+            #
+            # If --verbosity param has been set
+            #
+            if args.verbosity != "null":
+                Args.verbosity = True
 
-        #
-        # If --profile param has been set
-        #
-        if args.profile != "null":
-            try:
-                # If a profile is set (not 'None'), change the app profile
-                if args.profile:
-                    # Get current profile
-                    currentProfile = myAppConfig.getProfile()
+            #
+            # If --assume-yes param has been set
+            #
+            if args.assume_yes != "null":
+                Args.assume_yes = True
 
-                    # If a profile was already set
-                    if currentProfile:
-                        # Print profile change
-                        print(' Switching from profile ' + Fore.YELLOW + currentProfile + Style.RESET_ALL + ' to ' + Fore.YELLOW + args.profile + Style.RESET_ALL)
+            #
+            # If --profile param has been set
+            #
+            if args.profile != "null":
+                try:
+                    # If a profile is set (not 'None'), change the app profile
+                    if args.profile:
+                        # Get current profile
+                        currentProfile = myAppConfig.getProfile()
+
+                        # If a profile was already set
+                        if currentProfile:
+                            # Print profile change
+                            print(' Switching from profile ' + Fore.YELLOW + currentProfile + Style.RESET_ALL + ' to ' + Fore.YELLOW + args.profile + Style.RESET_ALL)
+                        else:
+                            # Print profile change
+                            print(' Switching to profile ' + Fore.YELLOW + args.profile + Style.RESET_ALL)
+
+                        # Set new profile
+                        myAppConfig.setProfile(args.profile)
+
+                    # Else print the current profile
                     else:
-                        # Print profile change
-                        print(' Switching to profile ' + Fore.YELLOW + args.profile + Style.RESET_ALL)
-
-                    # Set new profile
-                    myAppConfig.setProfile(args.profile)
-                # Else print the current profile
-                else:
-                    print(' Current profile: ' + Fore.YELLOW + myAppConfig.getProfile() + Style.RESET_ALL)
-            except Exception as e:
-                print(Fore.YELLOW + ' Error while changing profile: ' + str(e) + Style.RESET_ALL)
-                myExit.cleanExit(1)    
-
-            myExit.cleanExit()
-
-        #
-        # If --env param has been set
-        #
-        if args.env != "null":
-            try:
-                # If a environment is set (not 'None'), change the app environment
-                if args.env:
-                    # Get current environment
-                    currentEnvironment = myAppConfig.getEnvironment()
-
-                    # Print environment change
-                    print(' Switching from environment ' + Fore.YELLOW + currentEnvironment + Style.RESET_ALL + ' to ' + Fore.YELLOW + args.env + Style.RESET_ALL)
-
-                    # Set new environment
-                    myAppConfig.setEnvironment(args.env)
-                # Else print the current environment
-                else:
-                    print('Current environment: ' + Fore.YELLOW + myAppConfig.getEnvironment() + Style.RESET_ALL)
-            except Exception as e:
-                print(Fore.YELLOW + ' Error while changing environment: ' + str(e) + Style.RESET_ALL)
-                myExit.cleanExit(1)    
-
-            myExit.cleanExit()
-
-        #
-        # If --ignore-exclude param has been set
-        #
-        if args.ignore_exclude != "null":
-            Args.ignore_exclude = True
-
-        #
-        # If --check-updates param has been set
-        #
-        if args.check_updates != "null":
-            Args.check_updates = True
-
-        #
-        # If --dist-upgrade param has been set
-        #
-        if args.dist_upgrade != "null":
-            Args.dist_upgrade = True
-
-        #
-        # If --keep-oldconf param has been set
-        #
-        if args.keep_oldconf != "null":
-            Args.keep_oldconf = True
-
-        #
-        # If --get-exclude param has been set
-        #
-        if args.get_exclude != "null":
-            print(' Currently excluded packages: ' + Fore.YELLOW + str(myAppConfig.getExclude()) + Style.RESET_ALL)
-            myExit.cleanExit()
-
-        #
-        # If --get-exclude-major param has been set
-        #
-        if args.get_exclude_major != "null":
-            print(' Currently excluded packages on major update: ' + Fore.YELLOW + str(myAppConfig.getExcludeMajor()) + Style.RESET_ALL)
-            myExit.cleanExit()
-
-        #
-        # If --get-service-restart param has been set
-        #
-        if args.get_service_restart != "null":
-            print(' Services to restart after package update: ' + Fore.YELLOW + str(myAppConfig.getServiceToRestart()) + Style.RESET_ALL)
-            myExit.cleanExit()
-
-        #
-        # If --exclude param has been set
-        #
-        if args.exclude != "null":
-            try:
-                myAppConfig.setExclude(args.exclude)
-
-                print(' Excluding packages: ' + Fore.YELLOW + str(myAppConfig.getExclude()) + Style.RESET_ALL)
-            except Exception as e:
-                print(Fore.YELLOW + ' Error while excluding packages: ' + str(e) + Style.RESET_ALL)
-                myExit.cleanExit(1)
-
-            myExit.cleanExit()
-
-        #
-        # If --exclude-major param has been set
-        #
-        if args.exclude_major != "null":
-            try:
-                myAppConfig.setExcludeMajor(args.exclude_major)
-
-                print(' Excluding packages on major update: ' + Fore.YELLOW + str(myAppConfig.getExcludeMajor()) + Style.RESET_ALL)
-            except Exception as e:
-                print(Fore.YELLOW + ' Error while excluding packages on major update: ' + str(e) + Style.RESET_ALL)
-                myExit.cleanExit(1)
-
-            myExit.cleanExit()
-
-        #
-        # If --service-restart param has been set
-        #
-        if args.service_restart != "null":
-            try:
-                myAppConfig.setServiceToRestart(args.service_restart)
-
-                print(' Services to restart after package update: ' + Fore.YELLOW + str(myAppConfig.getServiceToRestart()) + Style.RESET_ALL)
-            except Exception as e:
-                print(Fore.YELLOW + ' Error while setting services to restart after package update: ' + str(e) + Style.RESET_ALL)
-                myExit.cleanExit(1)
-
-            myExit.cleanExit()
-        
-        #
-        # If --mod-list param has been set
-        #
-        if args.mod_list != "null":
-            myModule.list()
-            myExit.cleanExit()
-
-        #
-        # If --mod-enable param has been set
-        #
-        if args.mod_enable != "null":
-            # If module to enable is set (not 'None'), enable the module
-            if args.mod_enable:
-                # Enable module
-                try:
-                    myModule.enable(args.mod_enable)
+                        print(' Current profile: ' + Fore.YELLOW + myAppConfig.getProfile() + Style.RESET_ALL)
+                    
                     myExit.cleanExit()
-                except Exception as e:
-                    print(Fore.YELLOW + ' Error while enabling module: ' + str(e) + Style.RESET_ALL)
-                    myExit.cleanExit(1)
 
-        #
-        # If --mod-disable param has been set
-        #
-        if args.mod_disable != "null":
-            # If module to disable is set (not 'None'), disable the module
-            if args.mod_disable:
-                # Disable module
+                except Exception as e:
+                    raise Exception('could not switch profile: ' + str(e))
+
+            #
+            # If --env param has been set
+            #
+            if args.env != "null":
                 try:
-                    myModule.disable(args.mod_disable)
-                    myExit.cleanExit()
-                except Exception as e:
-                    print(Fore.YELLOW + ' Error while disabling module: ' + str(e) + Style.RESET_ALL)
-                    myExit.cleanExit(1)
+                    # If a environment is set (not 'None'), change the app environment
+                    if args.env:
+                        # Get current environment
+                        currentEnvironment = myAppConfig.getEnvironment()
 
-        #
-        # If --mod-configure param has been set
-        #
-        if args.mod_configure != "null":
-            # If module to configure is set (not 'None'), configure the module
-            if args.mod_configure:
-                # Configure module
-                myModule.configure(args.mod_configure)
+                        # Print environment change
+                        print(' Switching from environment ' + Fore.YELLOW + currentEnvironment + Style.RESET_ALL + ' to ' + Fore.YELLOW + args.env + Style.RESET_ALL)
+
+                        # Set new environment
+                        myAppConfig.setEnvironment(args.env)
+                    # Else print the current environment
+                    else:
+                        print('Current environment: ' + Fore.YELLOW + myAppConfig.getEnvironment() + Style.RESET_ALL)
+
+                    myExit.cleanExit()
+
+                except Exception as e:
+                    raise Exception('could not switch environment: ' + str(e))
+
+
+            #
+            # If --ignore-exclude param has been set
+            #
+            if args.ignore_exclude != "null":
+                Args.ignore_exclude = True
+
+            #
+            # If --check-updates param has been set
+            #
+            if args.check_updates != "null":
+                Args.check_updates = True
+
+            #
+            # If --dist-upgrade param has been set
+            #
+            if args.dist_upgrade != "null":
+                Args.dist_upgrade = True
+
+            #
+            # If --keep-oldconf param has been set
+            #
+            if args.keep_oldconf != "null":
+                Args.keep_oldconf = True
+
+            #
+            # If --get-exclude param has been set
+            #
+            if args.get_exclude != "null":
+                packages = myAppConfig.getExclude()
+
+                print(' Currently excluded packages: ' + Fore.YELLOW)
+
+                for package in packages:
+                    print('  ▪ ' + package)
+                
+                # If no package is excluded
+                if not packages:
+                    print('  ▪ None')
+
+                print(Style.RESET_ALL)
+
                 myExit.cleanExit()
+
+            #
+            # If --get-exclude-major param has been set
+            #
+            if args.get_exclude_major != "null":
+                packages = myAppConfig.getExcludeMajor()
+
+                print(' Currently excluded packages on major update: ' + Fore.YELLOW)
+
+                for package in packages:
+                    print('  ▪ ' + package)
+
+                # If no package is excluded
+                if not packages:
+                    print('  ▪ None')
+
+                print(Style.RESET_ALL)
+
+                myExit.cleanExit()
+
+            #
+            # If --get-service-restart param has been set
+            #
+            if args.get_service_restart != "null":
+                services = myAppConfig.getServiceToRestart()
+
+                print(' Services to restart after package update: ' + Fore.YELLOW)
+
+                for service in services:
+                    print('  ▪ ' + service)
+
+                # If no service is set to restart
+                if not services:
+                    print('  ▪ None')
+
+                print(Style.RESET_ALL)
+
+                myExit.cleanExit()
+
+            #
+            # If --exclude param has been set
+            #
+            if args.exclude != "null":
+                try:
+                    # Exclude packages
+                    myAppConfig.setExclude(args.exclude)
+
+                    # Print excluded packages
+                    packages = myAppConfig.getExclude()
+
+                    print(' Excluding packages: ' + Fore.YELLOW)
+                    
+                    for package in packages:
+                        print('  ▪ ' + package)
+
+                    # If no package is excluded
+                    if not packages:
+                        print('  ▪ None')
+
+                    print(Style.RESET_ALL)
+
+                    myExit.cleanExit()
+                except Exception as e:
+                    raise Exception('Could not exclude packages: ' + str(e))
+
+            #
+            # If --exclude-major param has been set
+            #
+            if args.exclude_major != "null":
+                try:
+                    # Exclude packages on major update
+                    myAppConfig.setExcludeMajor(args.exclude_major)
+
+                    # Print excluded packages
+                    packages = myAppConfig.getExcludeMajor()
+
+                    print(' Excluding packages on major update: ' + Fore.YELLOW)
+
+                    for package in packages:
+                        print('  ▪ ' + package)
+
+                    # If no package is excluded
+                    if not packages:
+                        print('  ▪ None')
+
+                    print(Style.RESET_ALL)
+
+                    myExit.cleanExit()
+                except Exception as e:
+                    raise Exception('Could not exclude packages on major update: ' + str(e))
+
+            #
+            # If --service-restart param has been set
+            #
+            if args.service_restart != "null":
+                try:
+                    # Set services to restart after package update
+                    myAppConfig.setServiceToRestart(args.service_restart)
+
+                    # Print services to restart
+                    services = myAppConfig.getServiceToRestart()
+
+                    print(' Setting services to restart after package update: ' + Fore.YELLOW)
+
+                    for service in services:
+                        print('  ▪ ' + service)
+
+                    # If no service is set to restart
+                    if not services:
+                        print('  ▪ None')
+
+                    print(Style.RESET_ALL)
+
+                    myExit.cleanExit()
+                except Exception as e:
+                    raise Exception('Could not set services to restart after package update: ' + str(e))
+            
+            #
+            # If --mod-list param has been set
+            #
+            if args.mod_list != "null":
+                myModule.list()
+                myExit.cleanExit()
+
+            #
+            # If --mod-enable param has been set
+            #
+            if args.mod_enable != "null":
+                # If module to enable is set (not 'None'), enable the module
+                if args.mod_enable:
+                    # Enable module
+                    try:
+                        myModule.enable(args.mod_enable)
+                        myExit.cleanExit()
+                    except Exception as e:
+                        raise Exception('Could not enable module: ' + str(e))
+
+            #
+            # If --mod-disable param has been set
+            #
+            if args.mod_disable != "null":
+                # If module to disable is set (not 'None'), disable the module
+                if args.mod_disable:
+                    # Disable module
+                    try:
+                        myModule.disable(args.mod_disable)
+                        myExit.cleanExit()
+                    except Exception as e:
+                        raise Exception('Could not disable module: ' + str(e))
+
+            #
+            # If --mod-configure param has been set
+            #
+            if args.mod_configure != "null":
+                # If module to configure is set (not 'None'), configure the module
+                if args.mod_configure:
+                    try:
+                        # Configure module
+                        myModule.configure(args.mod_configure)
+                        myExit.cleanExit()
+                    except Exception as e:
+                        raise Exception('Could not configure module: ' + str(e))
+
+        except Exception as e:
+            raise Exception(str(e))

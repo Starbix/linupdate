@@ -67,7 +67,10 @@ class App:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def setLock(self):
-        Path('/tmp/linupdate.lock').touch()
+        try:
+            Path('/tmp/linupdate.lock').touch()
+        except Exception as e:
+            raise Exception('Could not create lock file /tmp/linupdate.lock: ' + str(e))
 
     
     #-------------------------------------------------------------------------------------------------------------------
@@ -76,7 +79,10 @@ class App:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def removeLock(self):
-        Path('/tmp/linupdate.lock').unlink()
+        try:
+            Path('/tmp/linupdate.lock').unlink()
+        except Exception as e:
+            raise Exception('Could not remove lock file /tmp/linupdate.lock: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -85,24 +91,30 @@ class App:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def initialize(self):
-        Path(ROOT).mkdir(parents=True, exist_ok=True)
-        Path(ETC_DIR).mkdir(parents=True, exist_ok=True)
-        Path(MODULES_CONF_DIR).mkdir(parents=True, exist_ok=True)
-        Path(SERVICE_DIR).mkdir(parents=True, exist_ok=True)
-        Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
+        # Create base directories
+        try:
+            Path(ROOT).mkdir(parents=True, exist_ok=True)
+            Path(ETC_DIR).mkdir(parents=True, exist_ok=True)
+            Path(MODULES_CONF_DIR).mkdir(parents=True, exist_ok=True)
+            Path(SERVICE_DIR).mkdir(parents=True, exist_ok=True)
+            Path(LOGS_DIR).mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            raise Exception('Could not create base directories: ' + str(e))
 
         # Set permissions
-        Path(ROOT).chmod(0o750)
-        Path(SRC_DIR).chmod(0o750)
-        Path(ETC_DIR).chmod(0o750)
-        Path(MODULES_CONF_DIR).chmod(0o750)
-        Path(SERVICE_DIR).chmod(0o750)
-        Path(LOGS_DIR).chmod(0o750)
+        try:
+            Path(ROOT).chmod(0o750)
+            Path(SRC_DIR).chmod(0o750)
+            Path(ETC_DIR).chmod(0o750)
+            Path(MODULES_CONF_DIR).chmod(0o750)
+            Path(SERVICE_DIR).chmod(0o750)
+            Path(LOGS_DIR).chmod(0o750)
+        except Exception as e:
+            raise Exception('Could not set permissions to base directories: ' + str(e))
 
         # Check if the .src directory is empty
         if not len(list(Path(SRC_DIR).rglob('*'))):
-            print(Fore.YELLOW + 'Linupdate core files are missing. You might reinstall linupdate.' + Style.RESET_ALL)
-            exit(1)
+            raise Exception('Some linupdate core files are missing, please reinstall linupdate')
 
 
     #-------------------------------------------------------------------------------------------------------------------

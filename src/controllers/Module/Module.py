@@ -51,14 +51,13 @@ class Module:
         for mod in module.split(','):
             # Check if module exists
             if not self.exists(mod):
-                print(Fore.RED + ' Module ' + mod + ' does not exist' + Style.RESET_ALL)
-                continue
+                raise Exception('Module ' + mod + ' does not exist')
             
             # Continue if module is already enabled
             if mod in configuration['modules']['enabled']:
-                print(Fore.YELLOW + ' Module ' + mod + ' is already enabled' + Style.RESET_ALL)
+                print(Fore.GREEN + ' Module ' + mod + ' is already enabled' + Style.RESET_ALL)
                 continue
-        
+
             # Enable module
             self.configController.appendModule(mod)
 
@@ -79,8 +78,7 @@ class Module:
         for mod in module.split(','):
             # Check if module exists
             if not self.exists(mod):
-                print(Fore.RED + ' Module ' + mod + ' does not exist' + Style.RESET_ALL)
-                continue
+                raise Exception('Module ' + mod + ' does not exist')
             
             # Continue if module is already disabled
             if mod not in configuration['modules']['enabled']:
@@ -102,8 +100,7 @@ class Module:
     def configure(self, module):
         # Check if module exists
         if not self.exists(module):
-            print(Fore.YELLOW + ' Module ' + module + ' does not exist' + Style.RESET_ALL)
-            return
+            raise Exception('Module ' + module + ' does not exist')
         
         # Convert module name tu uppercase first letter
         moduleName = module.capitalize()
@@ -115,9 +112,6 @@ class Module:
         # Instanciate module and call module load method
         myModule = moduleClass()
         myModule.main()
-
-        # Print configured module
-        # print(' Module configured:' + Fore.YELLOW + ' ' + module + Style.RESET_ALL)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -142,7 +136,7 @@ class Module:
         # Retrieve configuration
         configuration = self.configController.getConf()
 
-        # Check if modules are enabled
+        # Quit if no modules are enabled
         if not configuration['modules']['enabled']:
             return
         
@@ -166,9 +160,9 @@ class Module:
 
                 # Add module to the list of loaded modules
                 self.loadedModules.append(module)
+
             except Exception as e:
-                print(Fore.RED + '  ✕ ' + Style.RESET_ALL + 'error while loading module ' + module + ': ' + str(e) + Style.RESET_ALL)
-                self.exitController.cleanExit(1)
+                raise Exception('Could not load module ' + module + ': ' + str(e) + Style.RESET_ALL)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -192,8 +186,7 @@ class Module:
                 myModule.pre()
 
             except Exception as e:
-                print('[ ' + Fore.YELLOW + 'ERROR' + Style.RESET_ALL + ' ] ' + str(e) + Style.RESET_ALL)
-                self.exitController.cleanExit(1)
+                raise Exception('Could not execute pre-update actions for module ' + module + ': ' + str(e) + Style.RESET_ALL)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -217,5 +210,4 @@ class Module:
                 myModule.post(updateSummary)
 
             except Exception as e:
-                print('[ ' + Fore.YELLOW + 'ERROR' + Style.RESET_ALL + ' ] ' + str(e) + Style.RESET_ALL)
-                self.exitController.cleanExit(1)
+                raise Exception('Could not execute post-update actions for module ' + module + ': ' + str(e) + Style.RESET_ALL)

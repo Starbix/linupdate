@@ -26,16 +26,13 @@ class Reposerver:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def load(self):
-        try:
-            # Generate config file if not exist
-            self.reposerverConfigController.generateConf()
+        # Note: no need of try / except block here, as it is already handled in the Module load() function
 
-            # Check config file
-            self.reposerverConfigController.checkConf()
+        # Generate config file if not exist
+        self.reposerverConfigController.generateConf()
 
-        except Exception as e:
-            print(Fore.YELLOW + ' Error while loading reposerver module: ' + str(e) + Style.RESET_ALL)
-            self.exitController.cleanExit(1)
+        # Check config file
+        self.reposerverConfigController.checkConf()
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -44,7 +41,7 @@ class Reposerver:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def pre(self):
-        # Note: no need of try / except block here, as it is already handled in the global module pre function
+        # Note: no need of try / except block here, as it is already handled in the Module pre() function
 
         # Retrieve global configuration from reposerver
         self.reposerverConfigController.getReposerverConf()
@@ -62,7 +59,9 @@ class Reposerver:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def post(self, updateSummary):
-        # TODO
+        # Note: no need of try / except block here, as it is already handled in the Module pre() function
+        
+        # TODO : à finir si pas fini
 
         print(updateSummary)
 

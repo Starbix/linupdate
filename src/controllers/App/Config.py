@@ -113,8 +113,7 @@ class Config:
                 raise Exception('enabled param is missing in the modules section')
 
         except Exception as e:
-            print(Fore.YELLOW + ' Fatal configuration error: ' + str(e) + Style.RESET_ALL)
-            exit(1)
+            raise Exception('Fatal configuration file error: ' + str(e) + Style.RESET_ALL)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -154,8 +153,11 @@ class Config:
         }
 
         # Write config file
-        with open(CONF, 'w') as file:
-            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+        try:
+            with open(CONF, 'w') as file:
+                yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            raise Exception('Could not create configuration file "' + CONF + '": ' + str(e))
 
     
     #-------------------------------------------------------------------------------------------------------------------
