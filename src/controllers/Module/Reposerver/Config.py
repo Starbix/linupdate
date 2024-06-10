@@ -37,13 +37,11 @@ class Config:
 
         # Minimal config file
         data = {
-            '#': 'Reposerver configuration',
             'reposerver': {
                 'url': '',
                 'ip': '',
                 'package_type': [],
             },
-            '#': 'This host configuration',
             'client': {
                 'id': '',
                 'token': '',
@@ -55,7 +53,6 @@ class Config:
                     }
                 }
             },
-            '#': 'Agent configuration',
             'agent': {
                 'enabled': False,
                 'listen': {
@@ -98,7 +95,7 @@ class Config:
     def setUrl(self, url):
         # Check that url is valid (start with http(s)://)
         if not url.startswith('http://') and not url.startswith('https://'):
-            raise Exception('Reposerver URL must start with http:// or https://')
+            raise Exception(' Reposerver URL must start with http:// or https://')
 
         # Get current configuration
         configuration = self.getConf()
@@ -144,93 +141,93 @@ class Config:
     #-------------------------------------------------------------------------------------------------------------------
     def checkConf(self):
         if not Path(self.conf).is_file():
-            raise Exception('Reposerver module configuration file not found')
+            raise Exception(' Reposerver module configuration file not found')
         
         # Retrieve configuration
         configuration = self.getConf()
 
         # Check if reposerver section exists
         if 'reposerver' not in configuration:
-            raise Exception('Reposerver section not found in configuration file')
+            raise Exception(' Reposerver section not found in configuration file')
         
         # Check if url exists
         if 'url' not in configuration['reposerver']:
-            raise Exception('Reposerver URL not found in configuration file')
+            raise Exception(' Reposerver URL not found in configuration file')
         
         # Check if ip exists
         if 'ip' not in configuration['reposerver']:
-            raise Exception('Reposerver IP not found in configuration file')
+            raise Exception(' Reposerver IP not found in configuration file')
         
         # Check if package_type exists
         if 'package_type' not in configuration['reposerver']:
-            raise Exception('Reposerver package_type not found in configuration file')
+            raise Exception(' Reposerver package_type not found in configuration file')
 
         # Check if client section exists
         if 'client' not in configuration:
-            raise Exception('Client section not found in configuration file')
+            raise Exception(' Client section not found in configuration file')
         
         # Check if id exists
         if 'id' not in configuration['client']:
-            raise Exception('Client Id not found in configuration file')
+            raise Exception(' Client Id not found in configuration file')
         
         # Check if token exists
         if 'token' not in configuration['client']:
-            raise Exception('Client token not found in configuration file')
+            raise Exception(' Client token not found in configuration file')
         
         # Check if get_profile_pkg_conf_from_reposerver exists and is set (True or False)
         if 'get_profile_pkg_conf_from_reposerver' not in configuration['client']:
-            raise Exception('Client get_profile_pkg_conf_from_reposerver not found in configuration file')
+            raise Exception(' Client get_profile_pkg_conf_from_reposerver not found in configuration file')
         
         if configuration['client']['get_profile_pkg_conf_from_reposerver'] not in [True, False]:
-            raise Exception('Client get_profile_pkg_conf_from_reposerver must be set to True or False')
+            raise Exception(' Client get_profile_pkg_conf_from_reposerver must be set to True or False')
 
         # Check if get_profile_repos_from_reposerver exists and is set (True or False)
         if 'get_profile_repos_from_reposerver' not in configuration['client']:
-            raise Exception('Client get_profile_repos_from_reposerver not found in configuration file')
+            raise Exception(' Client get_profile_repos_from_reposerver not found in configuration file')
         
         if configuration['client']['get_profile_repos_from_reposerver'] not in [True, False]:
-            raise Exception('Client get_profile_repos_from_reposerver must be set to True or False')
+            raise Exception(' Client get_profile_repos_from_reposerver must be set to True or False')
         
         # Check if profile section exists
         if 'profile' not in configuration['client']:
-            raise Exception('Client profile section not found in configuration file')
+            raise Exception(' Client profile section not found in configuration file')
         
         # Check if repos section exists
         if 'repos' not in configuration['client']['profile']:
-            raise Exception('Client profile repos section not found in configuration file')
+            raise Exception(' Client profile repos section not found in configuration file')
         
         # Check if clear_before_update exists and is set (True or False)
         if 'clear_before_update' not in configuration['client']['profile']['repos']:
-            raise Exception('Client profile repos clear_before_update not found in configuration file')
+            raise Exception(' Client profile repos clear_before_update not found in configuration file')
         
         if configuration['client']['profile']['repos']['clear_before_update'] not in [True, False]:
-            raise Exception('Client profile repos clear_before_update must be set to True or False')
+            raise Exception(' Client profile repos clear_before_update must be set to True or False')
         
         # Check if agent section exists
         if 'agent' not in configuration:
-            raise Exception('Agent section not found in configuration file')
+            raise Exception(' Agent section not found in configuration file')
         
         # Check if enabled exists and is set (True or False)
         if 'enabled' not in configuration['agent']:
-            raise Exception('Agent enabled not found in configuration file')
+            raise Exception(' Agent enabled not found in configuration file')
         
         if configuration['agent']['enabled'] not in [True, False]:
-            raise Exception('Agent enabled must be set to True or False')
+            raise Exception(' Agent enabled must be set to True or False')
         
         # Check if listen section exists
         if 'listen' not in configuration['agent']:
-            raise Exception('Agent listen section not found in configuration file')
+            raise Exception(' Agent listen section not found in configuration file')
         
         # Check if enabled exists and is set (True or False)
         if 'enabled' not in configuration['agent']['listen']:
-            raise Exception('Agent listen enabled not found in configuration file')
+            raise Exception(' Agent listen enabled not found in configuration file')
         
         if configuration['agent']['listen']['enabled'] not in [True, False]:
-            raise Exception('Agent listen enabled must be set to True or False')
+            raise Exception(' Agent listen enabled must be set to True or False')
         
         # Check if interface exists
         if 'interface' not in configuration['agent']['listen']:
-            raise Exception('Agent listen interface not found in configuration file')
+            raise Exception(' Agent listen interface not found in configuration file')
             
 
     #-------------------------------------------------------------------------------------------------------------------

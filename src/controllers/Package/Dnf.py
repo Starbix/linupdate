@@ -74,3 +74,32 @@ class Dnf:
     def updateCache(self):
         # Useless because dnf update command already updates the cache
         return
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Return dnf history Ids sorted by modification time
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def get_history(self, order):
+
+        result = subprocess.run(
+            ["dnf history list | tail -n +3 | awk '{print $1}'"],
+            capture_output = True,
+            text = True,
+            shell = True
+        )
+
+        # Quit if an error occurred
+        if result.returncode != 0:
+            print('Error while retrieving dnf history: ' + result.stderr)
+            exit(1)
+
+        # Retrieve history IDs
+        ids = result.stdout.splitlines()
+
+        # If order is newest, then sort by date in ascending order
+        if order == 'newest':
+            ids.reverse()
+
+        return ids

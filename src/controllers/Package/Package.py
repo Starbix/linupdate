@@ -132,6 +132,21 @@ class Package:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def update(self, assume_yes: bool = False, ignore_exclude: bool = False, check_updates: bool = False, dist_upgrade: bool = False, keep_oldconf: bool = True):        
+        # Package update summary
+        self.summary = {
+            'update': {
+                'status': 'running',
+                'success': {
+                    'count': 0,
+                    'packages': []
+                },
+                'failed': {
+                    'count': 0,
+                    'packages': []
+                }
+            }
+        }
+
         try:
             # Retrieve configuration
             configuration = self.appController.getConf()
@@ -141,11 +156,6 @@ class Package:
 
             # Retrieve available packages
             self.packagesToUpdateList = self.getAvailablePackages()
-
-            # Quit if there are no packages to update
-            if (len(self.packagesToUpdateList) == 0):
-                print(Fore.GREEN + '\n No package updates\n' + Style.RESET_ALL)
-                self.exitController.cleanExit()
 
             # Check for package exclusions
             self.exclude(ignore_exclude)
@@ -178,14 +188,15 @@ class Package:
             # TODO : check prettytable for table with width control https://pypi.org/project/prettytable/
             print(tabulate(table, headers=["", "Package", "Current version", "Available version", "Install decision"], tablefmt="simple"), end='\n\n')
 
-            # Quit if there are no packages to update after the exclusion
+            # Quit if there are no packages to update
             if self.packagesToUpdateCount == 0:
-                print(Fore.YELLOW + ' No package updates \n' + Style.RESET_ALL)
-                self.exitController.cleanExit()
-
+                print(Fore.GREEN + ' No package updates \n' + Style.RESET_ALL)
+                self.summary['status'] = 'nothing-to-do'
+                return
+            
             # Quit if --check-updates param has been specified
             if check_updates == True:
-                self.exitController.cleanExit()
+                exit(0)
 
             # If --assume-yes param has not been specified, then ask for confirmation before installing the printed packages update list
             if not assume_yes:
@@ -197,7 +208,7 @@ class Package:
                 # Quit if the answer is not 'y'
                 if answer.lower() != 'y':
                     print(Fore.YELLOW + ' Cancelled' + Style.RESET_ALL)
-                    self.exitController.cleanExit(1)
+                    exit(1)
 
             print('\n Updating packages...')
 
@@ -205,11 +216,30 @@ class Package:
             self.myPackageManagerController.update(self.packagesToUpdateList, exit_on_package_update_error, dist_upgrade, keep_oldconf)
 
             print('\n' + Fore.GREEN + ' Packages update completed' + Style.RESET_ALL)
+
+            # Update the summary status
+            self.summary['status'] = 'done'
+
         except Exception as e:
             print('\n' + Fore.RED + ' Packages update failed: ' + str(e) + Style.RESET_ALL)
+            self.summary['status'] = 'failed'
 
-        print('\n ' + Fore.GREEN + str(self.myPackageManagerController.upgraded['success']) + Style.RESET_ALL + ' packages updated, ' + Fore.RED + str(self.myPackageManagerController.upgraded['failed']) + Style.RESET_ALL + ' packages failed' + Style.RESET_ALL)
+        # Update the summary with the number of packages updated and failed
+        self.summary['update']['success']['count'] = self.myPackageManagerController.summary['success']['count']
+        self.summary['update']['success']['failed'] = self.myPackageManagerController.summary['failed']['count']
+
+        # Print the number of packages updated and failed
+        print('\n ' + Fore.GREEN + str(self.summary['update']['success']['count']) + Style.RESET_ALL + ' packages updated, ' + Fore.RED + str(self.summary['update']['success']['failed']) + Style.RESET_ALL + ' packages failed' + Style.RESET_ALL)
 
         # If there was a failed package update and the package update error is critical, then exit
-        if exit_on_package_update_error == True and self.myPackageManagerController.upgraded['failed'] > 0:
+        if exit_on_package_update_error == True and self.summary['update']['success']['failed'] > 0:
             self.exitController.cleanExit(1)
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Return history items (log file or history Ids) for a specific order
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def get_history(self, order):
+        return self.myPackageManagerController.get_history(order)

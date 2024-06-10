@@ -5,7 +5,6 @@ from constant import *
 
 # Import libraries
 from colorama import Fore, Back, Style
-import ipaddress
 import socket
 
 # Import classes
@@ -27,11 +26,6 @@ class Status:
         self.packageController          = Package()
         self.exitController             = Exit()
 
-        # Retrieve URL, ID and token
-        self.url = self.reposerverConfigController.getUrl()
-        self.id = self.reposerverConfigController.getId()
-        self.token = self.reposerverConfigController.getToken()
-
 
     #-------------------------------------------------------------------------------------------------------------------
     #
@@ -39,13 +33,22 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def updateRequestStatus(self, requestType: str, status: str):
-        # Do not print message if aknowledge request has been sent successfully
-        self.httpRequestController.quiet = True
+        try:
+            # Retrieve URL, ID and token
+            url = self.reposerverConfigController.getUrl()
+            id = self.reposerverConfigController.getId()
+            token = self.reposerverConfigController.getToken()
 
-        data = {
-            'status': status,
-        }
-        self.httpRequestController.put(self.url + '/api/v2/host/request/' + requestType, self.id, self.token, data)
+            # Do not print message if aknowledge request has been sent successfully
+            self.httpRequestController.quiet = True
+
+            data = {
+                'status': status,
+            }
+
+            self.httpRequestController.put(url + '/api/v2/host/request/' + requestType, id, token, data)
+        except Exception as e:
+            print(' Error while updating request status: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -54,6 +57,11 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def sendGeneralStatus(self):
+        # Retrieve URL, ID and token
+        url = self.reposerverConfigController.getUrl()
+        id = self.reposerverConfigController.getId()
+        token = self.reposerverConfigController.getToken()
+
         data = {
             'hostname': socket.gethostname(),
             'os_family': self.systemController.getOsFamily(),
@@ -69,14 +77,14 @@ class Status:
             'reboot_required': str(self.systemController.rebootRequired()).lower() # Convert True/False to 'true'/'false'
         }
 
-        print(' ▪ Sending status to ' + Fore.YELLOW + self.url + Style.RESET_ALL + ':')
+        print(' ▪ Sending status to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
         # Update Reposerver's request status, set it to 'running'
         self.updateRequestStatus('general-status-update', 'running')
 
         try:
             self.httpRequestController.quiet = False
-            self.httpRequestController.put(self.url + '/api/v2/host/status', self.id, self.token, data)
+            self.httpRequestController.put(url + '/api/v2/host/status', id, token, data)
             status = 'done'
         except Exception as e:
             status = 'error'
@@ -111,7 +119,7 @@ class Status:
         try:
             self.updateRequestStatus('packages-status-update', status)
         except Exception as e:
-            print('Error while updating request status: ' + str(e))
+            print(' Error while updating request status: ' + str(e))
             rc = 1
 
         # Exit with the appropriate return code        
@@ -124,6 +132,11 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def sendAvailablePackagesStatus(self):
+        # Retrieve URL, ID and token
+        url = self.reposerverConfigController.getUrl()
+        id = self.reposerverConfigController.getId()
+        token = self.reposerverConfigController.getToken()
+
         available_packages = 'none'
 
         print(' ▪ Building available packages list...')
@@ -159,7 +172,7 @@ class Status:
             data = {
                 'available_packages': available_packages
             }
-        
+
         except Exception as e:
             print(Fore.RED + '✕' + Style.RESET_ALL + ' error while retrieving available packages: ' + str(e))
 
@@ -168,10 +181,10 @@ class Status:
 
 
         # Send available packages to Reposerver
-        print(' ▪ Sending data to ' + Fore.YELLOW + self.url + Style.RESET_ALL + ':')
+        print(' ▪ Sending data to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
         self.httpRequestController.quiet = False
-        self.httpRequestController.put(self.url + '/api/v2/host/packages/available', self.id, self.token, data)
+        self.httpRequestController.put(url + '/api/v2/host/packages/available', id, token, data)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -180,6 +193,11 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def sendInstalledPackagesStatus(self):
+        # Retrieve URL, ID and token
+        url = self.reposerverConfigController.getUrl()
+        id = self.reposerverConfigController.getId()
+        token = self.reposerverConfigController.getToken()
+
         installed_packages = ''
 
         print(' ▪ Building installed packages list...')
@@ -215,16 +233,16 @@ class Status:
             }
 
         except Exception as e:
-            print(Fore.RED + '✕' + Style.RESET_ALL + ' error while retrieving installed packages: ' + str(e))
+            print(Fore.RED + ' ✕ ' + Style.RESET_ALL + 'error while retrieving installed packages: ' + str(e))
 
             # Raise an exception to set status to 'error'
             raise Exception()
         
         # Send installed packages to Reposerver
-        print(' ▪ Sending data to ' + Fore.YELLOW + self.url + Style.RESET_ALL + ':')
+        print(' ▪ Sending data to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
         self.httpRequestController.quiet = False
-        self.httpRequestController.put(self.url + '/api/v2/host/packages/installed', self.id, self.token, data)
+        self.httpRequestController.put(url + '/api/v2/host/packages/installed', id, token, data)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -232,6 +250,37 @@ class Status:
     #   Send packages history (installed, removed, upgraded, downgraded, etc.)
     #
     #-------------------------------------------------------------------------------------------------------------------
-    def sendFullHistory(self):
+    def sendFullHistory(self, entries_limit: int = 999999):
+        # Initialize a limit counter which will be incremented until it reaches the entries_limit
+        limit_counter = 0
+
+        # History parsing will start from the oldest to the newest
+        history_order = 'oldest'
+
+        # TODO here : update request full-history-update => 'running'
+
+        # If limit is set (not the default 999999), history parsing will start from the newest to the oldest
+        if entries_limit != 999999:        
+            history_order = 'newest'
+
+        try:
+            # Retrieve history Ids or files
+            items = self.packageController.get_history(history_order)
+        except Exception as e:
+            print(Fore.RED + ' ✕ ' + Style.RESET_ALL + str(e))
+
+
+
+
+        for item in items:
+            print(item)
+
+
+        exit()
+
+
+
+
+        return
         
 

@@ -3,6 +3,8 @@
 # Import libraries
 import apt
 import subprocess
+import glob
+import os
 from colorama import Fore, Back, Style
 
 class Apt:
@@ -152,9 +154,17 @@ class Apt:
     #-------------------------------------------------------------------------------------------------------------------
     def update(self, packagesList, exit_on_package_update_error: bool = True, dist_upgrade: bool = False, keep_oldconf: bool = True):
         # Total count of success and failed package updates
-        self.upgraded = {
-            'success': 0,
-            'failed': 0
+        self.summary = {
+            'update': {
+                'success': {
+                    'count': 0,
+                    'packages': []
+                },
+                'failed': {
+                    'count': 0,
+                    'packages': []
+                }
+            }
         }
 
         # Loop through the list of packages to update
@@ -184,7 +194,7 @@ class Apt:
             # If command failed, either raise an exception or print a warning
             if popen.returncode != 0:
 
-                self.upgraded['failed'] += 1
+                self.summary['update']['failed']['count'] += 1
 
                 # If error is critical, raise an exception
                 if (exit_on_package_update_error == True):
@@ -199,4 +209,22 @@ class Apt:
             popen.stdout.close()
 
             # If command succeeded, increment the success counter
-            self.upgraded['success'] += 1
+            self.summary['update']['success']['count'] += 1
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Return apt history log files sorted by modification time
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def get_history(self, order):
+        try:
+            files = sorted(glob.glob("/var/log/apt/history.log*"), key=os.path.getmtime)
+
+            # If order is newest, then sort by date in ascending order
+            if order == 'newest':
+                files.reverse()
+        except Exception as e:
+            raise Exception('Error while retrieving apt history log files: ' + str(e))
+
+        return files

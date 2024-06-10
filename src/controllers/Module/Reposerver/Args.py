@@ -91,10 +91,10 @@ class Args:
                 self.configController.setUrl(args.url)
 
                 # Print URL change
-                print('Reposerver URL set to ' + args.url)
+                print(' Reposerver URL set to ' + Fore.YELLOW + args.url + Style.RESET_ALL)
             # Else print the current URL
             else:
-                print('Current Reposerver URL: ' + self.configController.getUrl())
+                print(' Current Reposerver URL: ' + Fore.YELLOW + self.configController.getUrl() + Style.RESET_ALL)
 
         #
         # If --api-key param has been set

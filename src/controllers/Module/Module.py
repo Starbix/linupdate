@@ -117,7 +117,7 @@ class Module:
         myModule.main()
 
         # Print configured module
-        print(' Module configured:' + Fore.YELLOW + ' ' + module + Style.RESET_ALL)
+        # print(' Module configured:' + Fore.YELLOW + ' ' + module + Style.RESET_ALL)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -170,6 +170,7 @@ class Module:
                 print(Fore.RED + '  ✕ ' + Style.RESET_ALL + 'error while loading module ' + module + ': ' + str(e) + Style.RESET_ALL)
                 self.exitController.cleanExit(1)
 
+
     #-------------------------------------------------------------------------------------------------------------------
     #
     #   Execute modules pre-update actions (loaded modules only)
@@ -179,7 +180,7 @@ class Module:
         for module in self.loadedModules:
             try:
                 print('\n Executing ' + Fore.YELLOW + module + Style.RESET_ALL + ' pre-update actions')
-                # Convert module name tu uppercase first letter
+                # Convert module name to uppercase first letter
                 moduleName = module.capitalize()
 
                 # Import python module class
@@ -189,6 +190,31 @@ class Module:
                 # Instanciate module and call module pre method
                 myModule = moduleClass()
                 myModule.pre()
+
+            except Exception as e:
+                print('[ ' + Fore.YELLOW + 'ERROR' + Style.RESET_ALL + ' ] ' + str(e) + Style.RESET_ALL)
+                self.exitController.cleanExit(1)
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Execute modules post-update actions
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def post(self, updateSummary):
+        for module in self.loadedModules:
+            try:
+                print('\n Executing ' + Fore.YELLOW + module + Style.RESET_ALL + ' post-update actions')
+                # Convert module name to uppercase first letter
+                moduleName = module.capitalize()
+
+                # Import python module class
+                moduleImportPath = importlib.import_module('src.controllers.Module.'+ moduleName + '.' + moduleName)
+                moduleClass = getattr(moduleImportPath, moduleName)
+
+                # Instanciate module and call module post method
+                myModule = moduleClass()
+                myModule.post(updateSummary)
 
             except Exception as e:
                 print('[ ' + Fore.YELLOW + 'ERROR' + Style.RESET_ALL + ' ] ' + str(e) + Style.RESET_ALL)

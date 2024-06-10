@@ -30,7 +30,7 @@ class Register:
         if url == '':
             raise Exception(Fore.YELLOW + 'You must configure the target Reposerver URL [--url <url>]' + Style.RESET_ALL)
 
-        print(' Registering to ' + Fore.YELLOW + url + Style.RESET_ALL + ':', end=' ')
+        print('  ▪ Registering to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
         # Check if API key is not null
         if api_key == 'null':
@@ -54,6 +54,7 @@ class Register:
             'ip': ip,
             'hostname': socket.gethostname()
         }
+
         results = self.httpRequestController.postToken(url + '/api/v2/host/registering', api_key, data)
 
         # If registration is successful, the server will return an Id and a token, set Id and token in configuration
@@ -74,7 +75,7 @@ class Register:
         if url == '':
             raise Exception(Fore.YELLOW + 'You must configure the target Reposerver URL [--url <url>]' + Style.RESET_ALL)
 
-        print(' Unregistering from ' + Fore.YELLOW + url + Style.RESET_ALL + ':', end=' ')
+        print('  ▪ Unregistering from ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
         # Get Id and token from configuration
         id = self.configController.getId()
