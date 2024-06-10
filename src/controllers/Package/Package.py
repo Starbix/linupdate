@@ -37,6 +37,9 @@ class Package:
     #-------------------------------------------------------------------------------------------------------------------
     def exclude(self, ignore_exclude):
         try:
+            # Unhold / unexclude all packages
+            self.myPackageManagerController.unholdAll()
+
             # Create a new empty list of packages to update
             packagesToUpdateList = []
 
@@ -103,8 +106,7 @@ class Package:
             return self.myPackageManagerController.getInstalledPackages()
         
         except Exception as e:
-            print(Fore.YELLOW + ' Error while getting installed packages: ' + str(e) + Style.RESET_ALL)
-            self.exitController.cleanExit(1)
+            raise Exception('error while getting installed packages: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -121,8 +123,7 @@ class Package:
             return self.myPackageManagerController.getAvailablePackages()
 
         except Exception as e:
-            print(Fore.YELLOW + ' Error while getting available package updates: ' + str(e) + Style.RESET_ALL)
-            self.exitController.cleanExit(1)
+            raise Exception('error while getting available packages: ' + str(e))
     
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -217,21 +218,21 @@ class Package:
             print('\n' + Fore.GREEN + ' Packages update completed' + Style.RESET_ALL)
 
             # Update the summary status
-            self.summary['status'] = 'done'
+            self.summary['update']['status'] = 'done'
 
         except Exception as e:
             print('\n' + Fore.RED + ' Packages update failed: ' + str(e) + Style.RESET_ALL)
-            self.summary['status'] = 'failed'
+            self.summary['update']['status'] = 'failed'
 
         # Update the summary with the number of packages updated and failed
-        self.summary['update']['success']['count'] = self.myPackageManagerController.summary['success']['count']
-        self.summary['update']['success']['failed'] = self.myPackageManagerController.summary['failed']['count']
+        self.summary['update']['success']['count'] = self.myPackageManagerController.summary['update']['success']['count']
+        self.summary['update']['failed']['count'] = self.myPackageManagerController.summary['update']['failed']['count']
 
         # Print the number of packages updated and failed
-        print('\n ' + Fore.GREEN + str(self.summary['update']['success']['count']) + Style.RESET_ALL + ' packages updated, ' + Fore.RED + str(self.summary['update']['success']['failed']) + Style.RESET_ALL + ' packages failed' + Style.RESET_ALL)
+        print('\n ' + Fore.GREEN + str(self.summary['update']['success']['count']) + Style.RESET_ALL + ' packages updated, ' + Fore.RED + str(self.summary['update']['failed']['count']) + Style.RESET_ALL + ' packages failed' + Style.RESET_ALL)
 
         # If there was a failed package update and the package update error is critical, then raise an exception to exit
-        if exit_on_package_update_error == True and self.summary['update']['success']['failed'] > 0:
+        if exit_on_package_update_error == True and self.summary['update']['failed']['count'] > 0:
             raise Exception('Critical error: package update failed')
 
 

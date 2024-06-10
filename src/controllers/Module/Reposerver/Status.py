@@ -48,7 +48,7 @@ class Status:
 
             self.httpRequestController.put(url + '/api/v2/host/request/' + requestType, id, token, data)
         except Exception as e:
-            print(' Error while updating request status: ' + str(e))
+            raise Exception('could not acknowledge reposerver request of type ' + requestType + ': ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -57,27 +57,31 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def sendGeneralStatus(self):
-        # Retrieve URL, ID and token
-        url = self.reposerverConfigController.getUrl()
-        id = self.reposerverConfigController.getId()
-        token = self.reposerverConfigController.getToken()
+        try:
+            # Retrieve URL, ID and token
+            url = self.reposerverConfigController.getUrl()
+            id = self.reposerverConfigController.getId()
+            token = self.reposerverConfigController.getToken()
 
-        data = {
-            'hostname': socket.gethostname(),
-            'os_family': self.systemController.getOsFamily(),
-            'os': self.systemController.getOsName(),
-            'os_version': self.systemController.getOsVersion(),
-            'type': self.systemController.getVirtualization(),
-            'kernel': self.systemController.getKernel(),
-            'arch': self.systemController.getArch(),
-            'profile': self.configController.getProfile(),
-            'env': self.configController.getEnvironment(),
-            'agent_status': self.appController.getAgentStatus(),
-            'linupdate_version': self.appController.getVersion(),
-            'reboot_required': str(self.systemController.rebootRequired()).lower() # Convert True/False to 'true'/'false'
-        }
+            data = {
+                'hostname': socket.gethostname(),
+                'os_family': self.systemController.getOsFamily(),
+                'os': self.systemController.getOsName(),
+                'os_version': self.systemController.getOsVersion(),
+                'type': self.systemController.getVirtualization(),
+                'kernel': self.systemController.getKernel(),
+                'arch': self.systemController.getArch(),
+                'profile': self.configController.getProfile(),
+                'env': self.configController.getEnvironment(),
+                'agent_status': self.appController.getAgentStatus(),
+                'linupdate_version': self.appController.getVersion(),
+                'reboot_required': str(self.systemController.rebootRequired()).lower() # Convert True/False to 'true'/'false'
+            }
 
-        print(' ▪ Sending status to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
+            print(' ▪ Sending status to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
+
+        except Exception as e:
+            raise Exception('could not build general status data: ' + str(e))
 
         # Update Reposerver's request status, set it to 'running'
         self.updateRequestStatus('general-status-update', 'running')
@@ -85,12 +89,13 @@ class Status:
         try:
             self.httpRequestController.quiet = False
             self.httpRequestController.put(url + '/api/v2/host/status', id, token, data)
-            status = 'done'
+            # Update Reposerver's request status
+            self.updateRequestStatus('general-status-update', 'done')
         except Exception as e:
-            status = 'error'
+            # Update Reposerver's request status
+            self.updateRequestStatus('general-status-update', 'error')
 
-        # Update Reposerver's request status
-        self.updateRequestStatus('general-status-update', status)
+            raise Exception('error while sending general status to reposerver: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -101,29 +106,20 @@ class Status:
     def sendPackagesStatus(self):
         rc = 0
 
-        try:
-            # Update Reposerver's request status, set it to 'running'
-            self.updateRequestStatus('packages-status-update', 'running')
+        # Update Reposerver's request status, set it to 'running'
+        self.updateRequestStatus('packages-status-update', 'running')
 
+        try:
             # Send all status
             self.sendFullHistory()
             self.sendAvailablePackagesStatus()
             self.sendInstalledPackagesStatus()
 
-            status = 'done'
+            self.updateRequestStatus('packages-status-update', 'done')
         except Exception as e:
-            status = 'error'
-            rc = 1
-
-        # Update Reposerver's request status to 'done' or 'error'
-        try:
-            self.updateRequestStatus('packages-status-update', status)
-        except Exception as e:
-            print(' Error while updating request status: ' + str(e))
-            rc = 1
-
-        # Exit with the appropriate return code        
-        self.exitController.cleanExit(rc)
+            self.updateRequestStatus('packages-status-update', 'error')
+            
+            raise Exception('error while sending packages status to reposerver: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -174,11 +170,8 @@ class Status:
             }
 
         except Exception as e:
-            print(Fore.RED + '✕' + Style.RESET_ALL + ' error while retrieving available packages: ' + str(e))
-
             # Raise an exception to be caught in the main function
-            raise Exception()
-
+            raise Exception('error while retrieving available packages: ' + str(e))
 
         # Send available packages to Reposerver
         print(' ▪ Sending data to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
@@ -233,10 +226,8 @@ class Status:
             }
 
         except Exception as e:
-            print(Fore.RED + ' ✕ ' + Style.RESET_ALL + 'error while retrieving installed packages: ' + str(e))
-
             # Raise an exception to set status to 'error'
-            raise Exception()
+            raise Exception('error while retrieving installed packages: ' + str(e))
         
         # Send installed packages to Reposerver
         print(' ▪ Sending data to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')

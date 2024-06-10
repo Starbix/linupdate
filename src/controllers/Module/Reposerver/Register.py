@@ -28,26 +28,26 @@ class Register:
 
         # Check if URL is not null
         if url == '':
-            raise Exception(Fore.YELLOW + 'You must configure the target Reposerver URL [--url <url>]' + Style.RESET_ALL)
+            raise Exception('you must configure the target reposerver URL [--url <url>]')
 
         print('  ▪ Registering to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
         # Check if API key is not null
         if api_key == 'null':
-            raise Exception(Fore.YELLOW + 'You must specify an API key from a Repomanager user account [--register --api-key <api-key>]' + Style.RESET_ALL)
+            raise Exception('you must specify an API key from a Repomanager user account [--register --api-key <api-key>]')
 
         # If no IP has been specified (null), then retrieve the public IP of the host
         if ip == 'null':
             try:
                 ip = self.httpRequestController.get('https://api.ipify.org', '', '', 2).text
             except Exception as e:
-                raise Exception(Fore.YELLOW + 'Failed to retrieve public IP from https://api.ipify.org (resource might be temporarily unavailable): ' + str(e) + Style.RESET_ALL)
+                raise Exception('failed to retrieve public IP from https://api.ipify.org (resource might be temporarily unavailable): ' + str(e))
 
         # Check that the IP is valid
         try:
             ipaddress.ip_address(ip)
         except ValueError:
-            raise Exception(Fore.YELLOW + 'Invalid IP address ' + ip + Style.RESET_ALL)
+            raise Exception('invalid IP address ' + ip)
 
         # Register to server using API key and IP (POST)
         data = {
@@ -73,7 +73,7 @@ class Register:
 
         # Check if URL is not null
         if url == '':
-            raise Exception(Fore.YELLOW + 'You must configure the target Reposerver URL [--url <url>]' + Style.RESET_ALL)
+            raise Exception('you must configure the target Reposerver URL [--url <url>]')
 
         print('  ▪ Unregistering from ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
@@ -83,10 +83,10 @@ class Register:
 
         # Check if Id and token are not null
         if id == '':
-            raise Exception(Fore.YELLOW + 'No auth Id found in configuration' + Style.RESET_ALL)
+            raise Exception('no auth Id found in configuration')
         
         if token == '':
-            raise Exception(Fore.YELLOW + 'No auth token found in configuration' + Style.RESET_ALL)
+            raise Exception('no auth token found in configuration')
         
         # Unregister from server using Id and token (DELETE)
         self.httpRequestController.delete(url + '/api/v2/host/registering', id, token)

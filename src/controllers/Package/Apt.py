@@ -10,13 +10,27 @@ from colorama import Fore, Back, Style
 class Apt:
     def __init__(self):
         # Unhold all packages
-        self.unholdAll()
+        # self.unholdAll()
 
         # Create an instance of the apt cache
         self.aptcache = apt.Cache()
 
         # self.aptcache.update()
         self.aptcache.open(None)
+
+        # Total count of success and failed package updates
+        self.summary = {
+            'update': {
+                'success': {
+                    'count': 0,
+                    'packages': []
+                },
+                'failed': {
+                    'count': 0,
+                    'packages': []
+                }
+            }
+        }
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -27,19 +41,23 @@ class Apt:
     def getInstalledPackages(self):
         list = []
 
-        # Loop through all installed packages
-        for pkg in self.aptcache:
-            # If the package is installed, add it to the list of installed packages
-            if pkg.is_installed:
-                myPackage = {
-                    'name': pkg.name,
-                    'version': pkg.installed.version,
-                }
+        try:
+            # Loop through all installed packages
+            for pkg in self.aptcache:
+                # If the package is installed, add it to the list of installed packages
+                if pkg.is_installed:
+                    myPackage = {
+                        'name': pkg.name,
+                        'version': pkg.installed.version,
+                    }
 
-                list.append(myPackage)
+                    list.append(myPackage)
+            
+            # Sort the list by package name
+            list.sort(key=lambda x: x['name'])
         
-        # Sort the list by package name
-        list.sort(key=lambda x: x['name'])
+        except Exception as e:
+            raise Exception('could not get installed packages: ' + str(e))
 
         return list
 
@@ -75,10 +93,10 @@ class Apt:
             # Sort the list by package name
             list.sort(key=lambda x: x['name'])
 
-            return list
-
         except Exception as e:
-            print('Error while getting available packages: ' + str(e))
+            raise Exception('could not get available packages: ' + str(e))
+        
+        return list
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -91,7 +109,7 @@ class Apt:
             self.aptcache.upgrade()
 
         except Exception as e:
-            print('Error while updating apt cache: ' + str(e))
+            print('could not update apt cache: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -108,8 +126,7 @@ class Apt:
         )
 
         if result.returncode != 0:
-            print('Error while getting holded packages: ' + result.stderr)
-            exit(1)
+            raise Exception('could not get holded packages')
 
         list = result.stdout.splitlines()
 
@@ -126,8 +143,7 @@ class Apt:
             )
 
             if result.returncode != 0:
-                print('Error while unholding package: ' + result.stderr)
-                exit(1)
+                raise Exception('could not unhold packages: ' + package)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -143,8 +159,7 @@ class Apt:
         )
 
         if result.returncode != 0:
-            print('Error while excluding package from update: ' + result.stderr)
-            exit(1)
+            raise Exception('could not exclude ' + package + ' package from update: ' + result.stderr)
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -153,20 +168,6 @@ class Apt:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def update(self, packagesList, exit_on_package_update_error: bool = True, dist_upgrade: bool = False, keep_oldconf: bool = True):
-        # Total count of success and failed package updates
-        self.summary = {
-            'update': {
-                'success': {
-                    'count': 0,
-                    'packages': []
-                },
-                'failed': {
-                    'count': 0,
-                    'packages': []
-                }
-            }
-        }
-
         # Loop through the list of packages to update
         for pkg in packagesList:
             # If the package is excluded, ignore it
@@ -225,6 +226,6 @@ class Apt:
             if order == 'newest':
                 files.reverse()
         except Exception as e:
-            raise Exception('Error while retrieving apt history log files: ' + str(e))
+            raise Exception('could not get apt history log files: ' + str(e))
 
         return files

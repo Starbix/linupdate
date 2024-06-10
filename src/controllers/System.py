@@ -106,7 +106,7 @@ class System:
         if self.getOsFamily() == 'Debian' and os.path.isfile('/var/run/reboot-required'):
             return True
         
-        # TODO: verify that it works
+        # TODO: verify that it works on centos
         if self.getOsFamily() == 'Redhat' and os.path.isfile('/usr/bin/needs-restarting'):
             if os.system('/usr/bin/needs-restarting -r') == 0:
                 return True

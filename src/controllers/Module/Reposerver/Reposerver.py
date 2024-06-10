@@ -63,10 +63,8 @@ class Reposerver:
         
         # TODO : à finir si pas fini
 
-        print(updateSummary)
-
         # Quit if there was no packages updates
-        if updateSummary['update']['success']['success'] == 0:
+        if updateSummary['update']['success']['count'] == 0:
             return
         
         # Generaly "*-release" packages on Redhat/CentOS reset .repo files. If a package of this type has been updated then we update the repos configuration from the repo server (profiles)

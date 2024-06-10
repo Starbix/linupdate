@@ -20,19 +20,23 @@ class Agent:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def setEnable(self, value: bool):
-        # Get current configuration
-        configuration = self.configController.getConf()
+        try:
+            # Get current configuration
+            configuration = self.configController.getConf()
 
-        # Set allow_repos_update
-        configuration['agent']['enabled'] = value
+            # Set allow_repos_update
+            configuration['agent']['enabled'] = value
 
-        # Write config file
-        self.configController.writeConf(configuration)
+            # Write config file
+            self.configController.writeConf(configuration)
 
-        if value:
-            print(' Reposerver agent ' + Fore.GREEN + 'enabled' + Style.RESET_ALL)
-        else:
-            print(' Reposerver agent ' + Fore.YELLOW + 'disabled' + Style.RESET_ALL)
+            if value:
+                print(' Reposerver agent ' + Fore.GREEN + 'enabled' + Style.RESET_ALL)
+            else:
+                print(' Reposerver agent ' + Fore.YELLOW + 'disabled' + Style.RESET_ALL)
+
+        except Exception as e:
+            raise Exception('could not set agent enable to ' + str(value) + ': ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -54,14 +58,20 @@ class Agent:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def setListenInterface(self, value: str):
-        # Get current configuration
-        configuration = self.configController.getConf()
+        try:
+            # Get current configuration
+            configuration = self.configController.getConf()
 
-        # Set listen interface
-        configuration['agent']['listen']['interface'] = value
+            # Set listen interface
+            configuration['agent']['listen']['interface'] = value
 
-        # Write config file
-        self.configController.writeConf(configuration)
+            # Write config file
+            self.configController.writeConf(configuration)
+        
+            print(' Agent listening interface set to ' + Fore.GREEN + value + Style.RESET_ALL)
+        
+        except Exception as e:
+            raise Exception('could not set agent listening interface to ' + value + ': ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -70,16 +80,20 @@ class Agent:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def setListenEnable(self, value: bool):
-        # Get current configuration
-        configuration = self.configController.getConf()
+        try:
+            # Get current configuration
+            configuration = self.configController.getConf()
 
-        # Set allow_repos_update
-        configuration['agent']['listen']['enabled'] = value
+            # Set allow_repos_update
+            configuration['agent']['listen']['enabled'] = value
 
-        # Write config file
-        self.configController.writeConf(configuration)
+            # Write config file
+            self.configController.writeConf(configuration)
 
-        if value:
-            print(' Agent listening ' + Fore.GREEN + 'enabled' + Style.RESET_ALL)
-        else:
-            print(' Agent listening ' + Fore.YELLOW + 'disabled' + Style.RESET_ALL)
+            if value:
+                print(' Agent listening ' + Fore.GREEN + 'enabled' + Style.RESET_ALL)
+            else:
+                print(' Agent listening ' + Fore.YELLOW + 'disabled' + Style.RESET_ALL)
+
+        except Exception as e:
+            raise Exception('could not set agent listening enable to ' + str(value) + ': ' + str(e))

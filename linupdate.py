@@ -100,7 +100,7 @@ def main():
             myPackage.update(myArgs.assume_yes, myArgs.ignore_exclude, myArgs.check_updates, myArgs.dist_upgrade, myArgs.keep_oldconf)
 
             # Execute post-update modules functions
-            myModule.post(myPackage.updateSummary)
+            myModule.post(myPackage.summary)
 
             # Restart services
             # TODO
