@@ -397,7 +397,7 @@ class Args:
                         myModule.configure(args.mod_configure)
                         myExit.cleanExit()
                     except Exception as e:
-                        raise Exception('Could not configure module: ' + str(e))
+                        raise Exception('Could not configure ' + args.mod_configure + ' module: ' + str(e))
 
         except Exception as e:
             raise Exception(str(e))

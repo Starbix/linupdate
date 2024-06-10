@@ -89,8 +89,7 @@ class Package:
 
             del configuration, excludeAlways, excludeOnMajorUpdate, packagesToUpdateList
         except Exception as e:
-            print(Fore.YELLOW + ' Error while excluding packages: ' + str(e) + Style.RESET_ALL)
-            self.exitController.cleanExit(1)
+            raise Exception('error while excluding packages: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -231,9 +230,9 @@ class Package:
         # Print the number of packages updated and failed
         print('\n ' + Fore.GREEN + str(self.summary['update']['success']['count']) + Style.RESET_ALL + ' packages updated, ' + Fore.RED + str(self.summary['update']['success']['failed']) + Style.RESET_ALL + ' packages failed' + Style.RESET_ALL)
 
-        # If there was a failed package update and the package update error is critical, then exit
+        # If there was a failed package update and the package update error is critical, then raise an exception to exit
         if exit_on_package_update_error == True and self.summary['update']['success']['failed'] > 0:
-            self.exitController.cleanExit(1)
+            raise Exception('Critical error: package update failed')
 
 
     #-------------------------------------------------------------------------------------------------------------------

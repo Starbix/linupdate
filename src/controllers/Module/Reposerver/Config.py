@@ -29,6 +29,7 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def generateConf(self):
+
         # Quit if the config file already exists
         if Path(self.conf).is_file():
             return
@@ -61,10 +62,13 @@ class Config:
                 }
             }
         }
-
-        # Write config file
-        with open(self.conf, 'w') as file:
-            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+        
+        try:
+            # Write config file
+            with open(self.conf, 'w') as file:
+                yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            raise Exception('error while generating reposerver configuration file ' + self.conf + ': ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -78,10 +82,10 @@ class Config:
 
         # Check if url exists in configuration and is not empty
         if 'url' not in configuration['reposerver']:
-            raise Exception(' Reposerver URL not found in configuration file')
+            raise Exception('reposerver URL not found in configuration file')
         
         if configuration['reposerver']['url'] == '':
-            raise Exception(' No Reposerver URL set. Please set a URL with --url <url> option')
+            raise Exception('no reposerver URL set. Please set a URL with --url <url> option')
 
         # Return URL
         return configuration['reposerver']['url']
@@ -95,7 +99,7 @@ class Config:
     def setUrl(self, url):
         # Check that url is valid (start with http(s)://)
         if not url.startswith('http://') and not url.startswith('https://'):
-            raise Exception(' Reposerver URL must start with http:// or https://')
+            raise Exception('reposerver URL must start with http:// or https://')
 
         # Get current configuration
         configuration = self.getConf()
@@ -119,8 +123,8 @@ class Config:
                 # Read YAML and return profile
                 return yaml.safe_load(stream)
 
-            except yaml.YAMLError as exception:
-                print(exception)
+            except yaml.YAMLError as e:
+                raise Exception('error while reading reposerver configuration file ' + self.conf + ': ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -129,9 +133,12 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def writeConf(self, configuration):
-        # Write config file
-        with open(self.conf, 'w') as file:
-            yaml.dump(configuration, file, default_flow_style=False, sort_keys=False)
+        try:
+            # Write config file
+            with open(self.conf, 'w') as file:
+                yaml.dump(configuration, file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            raise Exception('error while writing to reposerver configuration file ' + self.conf + ': ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -141,93 +148,95 @@ class Config:
     #-------------------------------------------------------------------------------------------------------------------
     def checkConf(self):
         if not Path(self.conf).is_file():
-            raise Exception(' Reposerver module configuration file not found')
-        
+            raise Exception('reposerver module configuration file not found ' + self.conf)
+
         # Retrieve configuration
         configuration = self.getConf()
 
         # Check if reposerver section exists
         if 'reposerver' not in configuration:
-            raise Exception(' Reposerver section not found in configuration file')
+            raise Exception(Fore.YELLOW + 'reposerver' + Style.RESET_ALL + ' section not found in configuration file')
         
         # Check if url exists
         if 'url' not in configuration['reposerver']:
-            raise Exception(' Reposerver URL not found in configuration file')
+            raise Exception('reposerver ' + Fore.YELLOW + 'url' + Style.RESET_ALL + ' not found in configuration file')
         
         # Check if ip exists
         if 'ip' not in configuration['reposerver']:
-            raise Exception(' Reposerver IP not found in configuration file')
+            raise Exception('reposerver ' + Fore.YELLOW + 'ip' + Style.RESET_ALL + ' not found in configuration file')
         
         # Check if package_type exists
         if 'package_type' not in configuration['reposerver']:
-            raise Exception(' Reposerver package_type not found in configuration file')
+            raise Exception('reposerver ' + Fore.YELLOW + 'package_type' + Style.RESET_ALL + ' not found in configuration file')
 
         # Check if client section exists
         if 'client' not in configuration:
-            raise Exception(' Client section not found in configuration file')
+            raise Exception(Fore.YELLOW + 'client' + Style.RESET_ALL + ' section not found in configuration file')
         
         # Check if id exists
         if 'id' not in configuration['client']:
-            raise Exception(' Client Id not found in configuration file')
+            raise Exception('client ' + Fore.YELLOW + 'id' + Style.RESET_ALL + ' not found in configuration file')
         
         # Check if token exists
         if 'token' not in configuration['client']:
-            raise Exception(' Client token not found in configuration file')
+            raise Exception('client ' + Fore.YELLOW + 'token' + Style.RESET_ALL + ' not found in configuration file')
         
         # Check if get_profile_pkg_conf_from_reposerver exists and is set (True or False)
         if 'get_profile_pkg_conf_from_reposerver' not in configuration['client']:
-            raise Exception(' Client get_profile_pkg_conf_from_reposerver not found in configuration file')
+            raise Exception('client ' + Fore.YELLOW + 'get_profile_pkg_conf_from_reposerver' + Style.RESET_ALL + ' not found in configuration file')
         
         if configuration['client']['get_profile_pkg_conf_from_reposerver'] not in [True, False]:
-            raise Exception(' Client get_profile_pkg_conf_from_reposerver must be set to True or False')
+            raise Exception('client ' + Fore.YELLOW  + 'get_profile_pkg_conf_from_reposerver' + Style.RESET_ALL + ' must be set to True or False')
+
+
 
         # Check if get_profile_repos_from_reposerver exists and is set (True or False)
         if 'get_profile_repos_from_reposerver' not in configuration['client']:
-            raise Exception(' Client get_profile_repos_from_reposerver not found in configuration file')
+            raise Exception(Fore.YELLOW + 'client get_profile_repos_from_reposerver' + Style.RESET_ALL + ' not found in configuration file')
         
         if configuration['client']['get_profile_repos_from_reposerver'] not in [True, False]:
-            raise Exception(' Client get_profile_repos_from_reposerver must be set to True or False')
+            raise Exception(Fore.YELLOW + 'client get_profile_repos_from_reposerver' + Style.RESET_ALL + ' must be set to True or False')
         
         # Check if profile section exists
         if 'profile' not in configuration['client']:
-            raise Exception(' Client profile section not found in configuration file')
+            raise Exception('client ' + Fore.YELLOW + 'profile' + Style.RESET_ALL + ' section not found in configuration file')
         
         # Check if repos section exists
         if 'repos' not in configuration['client']['profile']:
-            raise Exception(' Client profile repos section not found in configuration file')
+            raise Exception('client profile ' + Fore.YELLOW + 'repos' + Style.RESET_ALL +' section not found in configuration file')
         
         # Check if clear_before_update exists and is set (True or False)
         if 'clear_before_update' not in configuration['client']['profile']['repos']:
-            raise Exception(' Client profile repos clear_before_update not found in configuration file')
+            raise Exception('client profile repos ' + Fore.YELLOW + 'clear_before_update' + Style.RESET_ALL + ' not found in configuration file')
         
         if configuration['client']['profile']['repos']['clear_before_update'] not in [True, False]:
-            raise Exception(' Client profile repos clear_before_update must be set to True or False')
+            raise Exception('client profile repos ' + Fore.YELLOW + 'clear_before_update' + Style.RESET_ALL + ' must be set to True or False')
         
         # Check if agent section exists
         if 'agent' not in configuration:
-            raise Exception(' Agent section not found in configuration file')
+            raise Exception(Fore.YELLOW + 'agent' + Style.RESET_ALL + ' section not found in configuration file')
         
         # Check if enabled exists and is set (True or False)
         if 'enabled' not in configuration['agent']:
-            raise Exception(' Agent enabled not found in configuration file')
-        
+            raise Exception('agent ' + Fore.YELLOW + 'enabled' + Style.RESET_ALL + ' not found in configuration file')
+
         if configuration['agent']['enabled'] not in [True, False]:
-            raise Exception(' Agent enabled must be set to True or False')
+            raise Exception('agent ' + Fore.YELLOW + 'enabled' + Style.RESET_ALL + ' must be set to True or False')
         
         # Check if listen section exists
         if 'listen' not in configuration['agent']:
-            raise Exception(' Agent listen section not found in configuration file')
+            raise Exception('agent ' + Fore.YELLOW + 'listen' + Style.RESET_ALL + ' section not found in configuration file')
         
         # Check if enabled exists and is set (True or False)
         if 'enabled' not in configuration['agent']['listen']:
-            raise Exception(' Agent listen enabled not found in configuration file')
+            raise Exception('agent listen ' + Fore.YELLOW + 'enabled' + Style.RESET_ALL + ' not found in configuration file')
         
         if configuration['agent']['listen']['enabled'] not in [True, False]:
-            raise Exception(' Agent listen enabled must be set to True or False')
-        
+            raise Exception('agent listen ' + Fore.YELLOW + 'enabled' + Style.RESET_ALL + ' must be set to True or False')
+
         # Check if interface exists
         if 'interface' not in configuration['agent']['listen']:
-            raise Exception(' Agent listen interface not found in configuration file')
+            raise Exception('agent listen ' + Fore.YELLOW + 'interface' + Style.RESET_ALL + ' not found in configuration file')
             
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -347,11 +356,11 @@ class Config:
 
         # Check if IP has been send by the server
         if 'Ip' not in results[0]:
-            raise Exception('Reposerver did not send its IP address')
+            raise Exception('reposerver did not send its IP address')
 
         # Check if package type has been send by the server
         if 'Package_type' not in results[0]:
-            raise Exception('Reposerver did not send its package type')
+            raise Exception('reposerver did not send its package type')
 
         # Set server IP
         self.setServerIp(results[0]['Ip'])
@@ -388,11 +397,11 @@ class Config:
 
         # Check if profile is not empty
         if not profile:
-            raise Exception('No profile set. Please set a profile with --profile <profile> option')
+            raise Exception('no profile set. Please set a profile with --profile <profile> option')
         
         # Check if Id and token are not empty
         if not id or not token:
-            raise Exception('No auth Id or token found in configuration')
+            raise Exception('no auth Id or token found in configuration')
 
         # Retrieve configuration from reposerver
         results = self.httpRequestController.get(url + '/api/v2/profile/' + profile + '/excludes', id, token, 2)
@@ -453,15 +462,15 @@ class Config:
 
         # Check if profile is not empty
         if not profile:
-            raise Exception('No profile set. Please set a profile with --profile <profile> option')
+            raise Exception('no profile set. Please set a profile with --profile <profile> option')
         
         # Check if environment is not empty
         if not env:
-            raise Exception('No environment set. Please set an environment with --env <environment> option')
+            raise Exception('no environment set. Please set an environment with --env <environment> option')
         
         # Check if Id and token are not empty
         if not id or not token:
-            raise Exception('No auth Id or token found in configuration')
+            raise Exception('no auth Id or token found in configuration')
 
         # Retrieve configuration from reposerver
         results = self.httpRequestController.get(url + '/api/v2/profile/' + profile + '/repos', id, token, 2)
@@ -533,7 +542,7 @@ class Config:
         try:
             ipaddress.ip_address(ip)
         except ValueError:
-            raise Exception('Invalid Reposerver IP address ' + ip)
+            raise Exception('invalid Reposerver IP address ' + ip)
 
         # Get current configuration
         configuration = self.getConf()

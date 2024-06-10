@@ -166,9 +166,12 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def writeConf(self, configuration):
-        # Write config file
-        with open(CONF, 'w') as file:
-            yaml.dump(configuration, file, default_flow_style=False, sort_keys=False)
+        try:
+            # Write config file
+            with open(CONF, 'w') as file:
+                yaml.dump(configuration, file, default_flow_style=False, sort_keys=False)
+        except Exception as e:
+            raise Exception('Could not write configuration file "' + CONF + '": ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------

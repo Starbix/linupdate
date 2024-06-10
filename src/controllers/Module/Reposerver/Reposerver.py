@@ -97,5 +97,4 @@ class Reposerver:
             # Parse reposerver arguments
             self.argsController.parse()
         except Exception as e:
-            print(Fore.YELLOW + str(e) + Style.RESET_ALL)
-            self.exitController.cleanExit(1)
+            raise Exception(str(e))
