@@ -5,7 +5,7 @@
 from constant import *
 
 # Import libraries
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 from pathlib import Path
 from datetime import datetime
 import socket
@@ -18,6 +18,7 @@ from src.controllers.Args import Args
 from src.controllers.System import System
 from src.controllers.Module.Module import Module
 from src.controllers.Package.Package import Package
+from src.controllers.Service.Service import Service
 from src.controllers.Exit import Exit
 
 
@@ -27,15 +28,18 @@ from src.controllers.Exit import Exit
 #
 #-------------------------------------------------------------------------------------------------------------------
 def main():
+    exit_code = 0
+
     try:
         # Instanciate classes
-        myExit      = Exit()
-        myApp       = App()
-        myAppConfig = Config()
-        myArgs      = Args()
-        mySystem    = System()
-        myModule    = Module()
-        myPackage   = Package()
+        my_exit       = Exit()
+        my_app        = App()
+        my_app_config = Config()
+        my_args       = Args()
+        my_system     = System()
+        my_module     = Module()
+        my_package    = Package()
+        my_service    = Service()
 
         # Get current date and time
         todaydatetime = datetime.now()
@@ -49,10 +53,10 @@ def main():
         Path(logsdir).chmod(0o750)
 
         # Pre-parse arguments to check if --from-agent param is passed
-        myArgs.preParse()
+        my_args.preParse()
 
         # If --from-agent param is passed, then add -agent to the log filename and make it hidden
-        if myArgs.from_agent:
+        if my_args.from_agent:
             logfile = '.' + date + '_' + time + '_linupdate_' + socket.gethostname() + '-agent.log'
 
         # Create log file with correct permissions
@@ -62,59 +66,61 @@ def main():
         # Log everything to the log file
         with Log(logsdir + '/' + logfile):
             # Print Logo
-            myApp.printLogo()
+            my_app.printLogo()
+
+            my_exit.cleanExit(exit_code, logsdir + '/' + logfile) # toto
 
             # Exit if the user is not root
-            if not mySystem.isRoot():
+            if not my_system.isRoot():
                 print(Fore.YELLOW + 'Must be executed with sudo' + Style.RESET_ALL)
-                myExit.cleanExit(1)
+                my_exit.cleanExit(1)
 
             # Check if the system is supported
-            mySystem.check()
+            my_system.check()
 
             # Create lock file
-            myApp.setLock()
+            my_app.setLock()
 
             # Create base directories
-            myApp.initialize()
+            my_app.initialize()
 
             # Generate config file if not exist
-            myAppConfig.generateConf()
+            my_app_config.generateConf()
 
             # Check if there are missing parameters
-            myAppConfig.checkConf()
+            my_app_config.checkConf()
 
             # Parse arguments
-            myArgs.parse()
+            my_args.parse()
 
             # Print system & app summary
-            myApp.printSummary(myArgs.from_agent)
+            my_app.printSummary(my_args.from_agent)
 
             # Load modules
-            myModule.load()
+            my_module.load()
 
             # Execute pre-update modules functions
-            myModule.pre()
+            my_module.pre()
 
             # Execute packages update
-            myPackage.update(myArgs.assume_yes, myArgs.ignore_exclude, myArgs.check_updates, myArgs.dist_upgrade, myArgs.keep_oldconf)
+            my_package.update(my_args.assume_yes, my_args.ignore_exclude, my_args.check_updates, my_args.dist_upgrade, my_args.keep_oldconf)
 
             # Execute post-update modules functions
-            myModule.post(myPackage.summary)
+            my_module.post(my_package.summary)
 
             # Restart services
-            # TODO
+            my_service.restart(my_package.summary)
 
             # Check if reboot is required
-            if mySystem.rebootRequired() == True:
+            if my_system.rebootRequired() is True:
                 print(' ' + Fore.YELLOW + 'Reboot is required' + Style.RESET_ALL)
-
-            # Send mail
-            # TODO
 
     except Exception as e:
         print('\n' + Fore.RED + ' ✕ ' + Style.RESET_ALL + str(e) + '\n')
-        myExit.cleanExit(1)
+        exit_code = 1
+
+    # Exit with exit code and logfile for email report
+    my_exit.cleanExit(exit_code, logsdir + '/' + logfile)
 
 # Run main function
 main()

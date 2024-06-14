@@ -5,7 +5,6 @@ from constant import *
 
 # Import libraries
 from pathlib import Path
-from colorama import Fore, Back, Style
 import yaml
 
 class Config:
@@ -18,12 +17,11 @@ class Config:
         # Open YAML config file:
         with open(CONF) as stream:
             try:
-                # Read YAML and return profile
-                data = yaml.safe_load(stream)
-                return data
+                # Read YAML and return configuration
+                return yaml.safe_load(stream)
 
-            except yaml.YAMLError as exception:
-                print(exception)
+            except yaml.YAMLError as e:
+                raise Exception(str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -113,7 +111,7 @@ class Config:
                 raise Exception('enabled param is missing in the modules section')
 
         except Exception as e:
-            raise Exception('Fatal configuration file error: ' + str(e) + Style.RESET_ALL)
+            raise Exception('Fatal configuration file error: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -134,7 +132,7 @@ class Config:
 
                 'mail_alert': {
                     'enabled': False,
-                    'recipient': ''
+                    'recipient': [],
                 },
                 'exit_on_package_update_error': True,
             },
@@ -159,7 +157,7 @@ class Config:
         except Exception as e:
             raise Exception('Could not create configuration file "' + CONF + '": ' + str(e))
 
-    
+
     #-------------------------------------------------------------------------------------------------------------------
     #
     #   Write linupdate configuration to config file
@@ -180,16 +178,11 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def getProfile(self):
-        # Open YAML config file:
-        with open(CONF) as stream:
-            try:
-                # Read YAML and return profile
-                data = yaml.safe_load(stream)
-                return data['main']['profile']
+        # Get current configuration
+        configuration = self.getConf()
 
-            except yaml.YAMLError as exception:
-                print(exception)
-            
+        return configuration['main']['profile']
+
 
     #-------------------------------------------------------------------------------------------------------------------
     #
@@ -213,16 +206,11 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def getEnvironment(self):
-        # Open YAML config file:
-        with open(CONF, 'r') as stream:
-            try:
-                # Read YAML and return environment
-                data = yaml.safe_load(stream)
-                return data['main']['environment']
+        # Get current configuration
+        configuration = self.getConf()
 
-            except yaml.YAMLError as exception:
-                print(exception)
-        
+        return configuration['main']['environment']
+
 
     #-------------------------------------------------------------------------------------------------------------------
     #
@@ -242,19 +230,38 @@ class Config:
 
     #-------------------------------------------------------------------------------------------------------------------
     #
+    #   Get mail enabled status
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def getMailEnabled(self):
+        # Get current configuration
+        configuration = self.getConf()
+
+        return configuration['main']['mail_alert']['enabled']
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Get mail recipient(s)
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def getMailRecipient(self):
+        # Get current configuration
+        configuration = self.getConf()
+
+        return configuration['main']['mail_alert']['recipient']
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
     #   Return linupdate packages exclude list from config file
     #
     #-------------------------------------------------------------------------------------------------------------------
     def getExclude(self):
-        # Open YAML config file:
-        with open(CONF, 'r') as stream:
-            try:
-                # Read YAML and return exclude list
-                data = yaml.safe_load(stream)
-                return data['packages']['exclude']['always']
+        # Get current configuration
+        configuration = self.getConf()
 
-            except yaml.YAMLError as exception:
-                print(exception)
+        return configuration['packages']['exclude']['always']
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -287,15 +294,10 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def getExcludeMajor(self):
-        # Open YAML config file:
-        with open(CONF, 'r') as stream:
-            try:
-                # Read YAML and return exclude list
-                data = yaml.safe_load(stream)
-                return data['packages']['exclude']['on_major_update']
+        # Get current configuration
+        configuration = self.getConf()
 
-            except yaml.YAMLError as exception:
-                print(exception)
+        return configuration['packages']['exclude']['on_major_update']
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -328,15 +330,10 @@ class Config:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def getServiceToRestart(self):
-        # Open YAML config file:
-        with open(CONF, 'r') as stream:
-            try:
-                # Read YAML and return services to restart
-                data = yaml.safe_load(stream)
-                return data['services']['restart']
+        # Get current configuration
+        configuration = self.getConf()
 
-            except yaml.YAMLError as exception:
-                print(exception)
+        return configuration['services']['restart']
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -378,7 +375,7 @@ class Config:
         # Write config file
         self.writeConf(configuration)
 
-    
+
     #-------------------------------------------------------------------------------------------------------------------
     #
     #   Remove a module from the enabled list

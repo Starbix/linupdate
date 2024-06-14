@@ -1,3 +1,5 @@
+# coding: utf-8
+
 import traceback
 import sys
 
@@ -14,14 +16,19 @@ class Log(object):
 
     def __exit__(self, exc_type, exc_value, tb):
         sys.stdout = self.stdout
-        # if exc_type is not None:
-            # self.file.write(traceback.format_exc())
+        if exc_type is not None:
+            self.file.write(traceback.format_exc())
         self.file.close()
 
     def write(self, data):
         self.file.write(data)
         self.stdout.write(data)
+        self.file.flush()
 
     def flush(self):
         self.file.flush()
         self.stdout.flush()
+
+    def getContent(self):
+        return self.stdout
+        
