@@ -6,6 +6,7 @@ from constant import *
 # Import libraries
 from colorama import Fore, Back, Style
 import socket
+import subprocess
 
 # Import classes
 from src.controllers.System import System
@@ -248,7 +249,10 @@ class Status:
         # History parsing will start from the oldest to the newest
         history_order = 'oldest'
 
-        # TODO here : update request full-history-update => 'running'
+        print(' ▪ Building packages history...')
+
+        # Update Reposerver's request status, set it to 'running'
+        self.updateRequestStatus('full-history-update', 'running')
 
         # If limit is set (not the default 999999), history parsing will start from the newest to the oldest
         if entries_limit != 999999:        
@@ -258,20 +262,45 @@ class Status:
             # Retrieve history Ids or files
             items = self.packageController.get_history(history_order)
         except Exception as e:
-            print(Fore.RED + ' ✕ ' + Style.RESET_ALL + str(e))
+            self.updateRequestStatus('full-history-update', 'error')
+            raise Exception('error while retrieving history: ' + str(e))
 
+        # If there is no item (would be strange), exit
+        if len(items) == 0:
+            print(' no history found')
+            return
 
-
-
+        # Parse each apt history files
         for item in items:
-            print(item)
+            # Retrieve all Start-Date in the history file
+            result = subprocess.run(
+                ['zgrep "^Start-Date:*" ' + item],
+                capture_output = True,
+                text = True,
+                shell = True
+            )
+
+            # Quit if an error occurred
+            if result.returncode != 0:
+                raise Exception('could not retrieve Start-Date from ' + item + ': ' + result.stderr)
+
+            # Split the result into a list
+            start_dates = result.stdout.strip().split('\n')
+
+            for start_date in start_dates:
+                # Quit if the limit of entries to send has been reached
+                if limit_counter > entries_limit:
+                    break
+                
+                # On ignore cet évènement si celui-ci a le même Id (même date) que le précédent
+                # if [ ! -z "$IGNORE_EVENT" ] && [ "$IGNORE_EVENT" == "$START_DATE" ];then
+                #     continue
+                # fi
+
+                # TODO à terminer
 
 
-        exit()
+        self.updateRequestStatus('full-history-update', 'done')
 
-
-
-
-        return
         
 

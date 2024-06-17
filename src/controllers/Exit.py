@@ -21,8 +21,8 @@ class Exit:
         # TODO
         # Clean files
 
-
-
+        # Clear apt / yum cache
+        # xxxx.clear_cache()
 
 
         # Send email
@@ -31,21 +31,22 @@ class Exit:
         mail_enabled = self.my_config.getMailEnabled()
         mail_recipient = self.my_config.getMailRecipient()
 
+        # TODO
         # Check if mail is enabled and recipient is set
-        if (mail_enabled and mail_recipient):
-            # Define mail subject depending on exit code
-            if exit_code == 0:
-                subject = '[ OK ] Packages update successful'
+        # if (mail_enabled and mail_recipient):
+        #     # Define mail subject depending on exit code
+        #     if exit_code == 0:
+        #         subject = '[ OK ] Packages update successful'
 
-            if exit_code == 1:
-                subject = '[ ERROR ] Packages update failed'
+        #     if exit_code == 1:
+        #         subject = '[ ERROR ] Packages update failed'
 
-            print(' Sending update mail report:', end=' ')
+        #     print(' Sending update mail report:', end=' ')
 
-            try:
-                self.my_mail.send(subject, 'Linupdate has finished updating packages', mail_recipient, logfile)
-                print('done')
-            except Exception as e:
-                print('error: ' + str(e))
+        #     try:
+        #         self.my_mail.send(subject, 'Linupdate has finished updating packages', mail_recipient, logfile)
+        #         print('done')
+        #     except Exception as e:
+        #         print('error: ' + str(e))
 
         exit(exit_code)

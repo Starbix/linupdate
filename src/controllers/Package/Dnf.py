@@ -3,6 +3,7 @@
 # Import libraries
 import os
 import subprocess
+import time
 
 class Dnf:
 
@@ -22,8 +23,7 @@ class Dnf:
 
         # Quit if an error occurred
         if result.returncode != 0:
-            print('Error while getting available packages: ' + result.stderr)
-            exit(1)
+            raise Exception('could not retrieve available packages list: ' + result.stderr)
 
         list = []
 
@@ -41,8 +41,7 @@ class Dnf:
 
                 # Quit if an error occurred
                 if result.returncode != 0:
-                    print('Error while retrieving current version of package ' + package[0] + ': ' + result.stderr)
-                    exit(1)
+                    raise Exception('could not retrieve current version of package ' + package[0] + ': ' + result.stderr)
 
                 current_version = result.stdout.strip()
 
@@ -55,15 +54,25 @@ class Dnf:
 
         return list
 
+
     #-------------------------------------------------------------------------------------------------------------------
     #
     #   Clear dnf cache
     #
     #-------------------------------------------------------------------------------------------------------------------
-    def clearCache(self):
-        # TODO
-        os.system('dnf clean all')
-        return
+    def clear_cache(self):
+        # Check if dnf lock is present
+        self.check_lock
+
+        result = subprocess.run(
+            ["dnf", "clean", "all"],
+            capture_output = True,
+            text = True,
+        )
+
+        # Quit if an error occurred
+        if result.returncode != 0:
+            raise Exception('Error while clearing dnf cache: ' + result.stderr)
     
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -82,7 +91,7 @@ class Dnf:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def get_history(self, order):
-
+        # Get history IDs
         result = subprocess.run(
             ["dnf history list | tail -n +3 | awk '{print $1}'"],
             capture_output = True,
@@ -92,8 +101,7 @@ class Dnf:
 
         # Quit if an error occurred
         if result.returncode != 0:
-            print('Error while retrieving dnf history: ' + result.stderr)
-            exit(1)
+            raise Exception('could nt retrieve dnf history: ' + result.stderr)
 
         # Retrieve history IDs
         ids = result.stdout.splitlines()
@@ -103,3 +111,16 @@ class Dnf:
             ids.reverse()
 
         return ids
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Wait for DNF lock to be released
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def check_lock(self):
+        if os.path.isfile('/var/run/dnf.pid'):
+            print(' Waiting for dnf lock...', end=' ')
+
+            while os.path.isfile('/var/run/dnf.pid'):
+                time.sleep(2)

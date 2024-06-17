@@ -78,10 +78,6 @@ class Apt:
             for pkg in self.aptcache.get_changes():
                 # If the package is upgradable, add it to the list of available packages
                 if pkg.is_upgradable:
-                    # TODO debug
-                    # if pkg.name != 'vim':
-                    #     continue
-
                     myPackage = {
                         'name': pkg.name,
                         'current_version': pkg.installed.version,
@@ -101,6 +97,22 @@ class Apt:
 
     #-------------------------------------------------------------------------------------------------------------------
     #
+    #   Clear apt cache
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def clear_cache(self):
+        result = subprocess.run(
+            ["apt", "clean", "all"],
+            capture_output = True,
+            text = True
+        )
+
+        if result.returncode != 0:
+            raise Exception('could not clear apt cache: ' + str(e))
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
     #   Update apt cache
     #
     #-------------------------------------------------------------------------------------------------------------------
@@ -109,7 +121,7 @@ class Apt:
             self.aptcache.upgrade()
 
         except Exception as e:
-            print('could not update apt cache: ' + str(e))
+            raise Exception('could not update apt cache: ' + str(e))
 
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -220,7 +232,7 @@ class Apt:
     #-------------------------------------------------------------------------------------------------------------------
     def get_history(self, order):
         try:
-            files = sorted(glob.glob("/var/log/apt/history.log*"), key=os.path.getmtime)
+            files = sorted(glob.glob('/var/log/apt/history.log*'), key=os.path.getmtime)
 
             # If order is newest, then sort by date in ascending order
             if order == 'newest':

@@ -31,6 +31,7 @@ class Args:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def parse(self):
+        # TODO renseigner toutes les descriptions
         try:
             # Parse arguments
             parser = argparse.ArgumentParser()
@@ -38,11 +39,11 @@ class Args:
             # Define valid arguments
 
             # URL
-            parser.add_argument("--url", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--url", action="store", nargs='?', default="null", help="Specify target reposerver URL")
             # API key
-            parser.add_argument("--api-key", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--api-key", action="store", nargs='?', default="null", help="Specify API key to authenticate to the reposerver")
             # IP
-            parser.add_argument("--ip", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--ip", action="store", nargs='?', default="null", help="Specify an alternative local IP address to use to authenticate to the reposerver")
         
             # Allow configuration update
             parser.add_argument("--allow-conf-update", action="store", nargs='?', default="null", help="")
@@ -50,36 +51,39 @@ class Args:
             parser.add_argument("--allow-repos-update", action="store", nargs='?', default="null", help="")
 
             # Agent enable
-            parser.add_argument("--agent-enable", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--agent-enable", action="store", nargs='?', default="null", help="Enable reposerver module agent. This agent will regularly send informations about this host to reposerver (global informations, packages informations...)")
             # Agent listen enable
-            parser.add_argument("--agent-listen-enable", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--agent-listen-enable", action="store", nargs='?', default="null", help="Enable or disable agent listening for requests coming from the reposerver")
             # Agent listen interface
-            parser.add_argument("--agent-listen-int", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--agent-listen-int", action="store", nargs='?', default="null", help="Specify the local network interface to use to listen for requests coming from the reposerver")
 
             # Register to reposerver
-            parser.add_argument("--register", action="store_true", default="null", help="")
+            parser.add_argument("--register", action="store_true", default="null", help="Register this host to the reposerver (--api-key required)")
             # Unregister from server
-            parser.add_argument("--unregister", action="store_true", default="null", help="")
+            parser.add_argument("--unregister", action="store_true", default="null", help="Unregister this host from the reposerver")
 
             # Retrieve reposerver main configuration
-            parser.add_argument("--get-server-conf", action="store_true", default="null", help="")
+            parser.add_argument("--get-reposerver-conf", action="store_true", default="null", help="Get reposerver global configuration")
             # Retrieve profile packages configuration from reposerver
-            parser.add_argument("--get-profile-packages-conf", action="store_true", default="null", help="")
+            parser.add_argument("--get-profile-packages-conf", action="store_true", default="null", help="Get profile packages configuration from reposerver")
             # Retrieve profile repositories from reposerver
-            parser.add_argument("--get-profile-repos", action="store_true", default="null", help="")
+            parser.add_argument("--get-profile-repos", action="store_true", default="null", help="Get profile repositories from reposerver")
             
             # Send status
-            parser.add_argument("--send-general-status", action="store_true", default="null", help="")
+            parser.add_argument("--send-general-status", action="store_true", default="null", help="Send host global informations (OS, version, kernel..) to the reposerver")
             # Send packages status
-            parser.add_argument("--send-packages-status", action="store_true", default="null", help="")
+            parser.add_argument("--send-packages-status", action="store_true", default="null", help="Send this host packages status to the reposerver (available, installed)")
+            # Send full history
+            parser.add_argument("--send-full-history", action="store_true", default="null", help="Send host packages events history (updates, downgrades, uninstallations...) to the reposerver")
             # Send full status
-            parser.add_argument("--send-full-status", action="store_true", default="null", help="")
-
-            # TODO
-            # --send-full-history
+            parser.add_argument("--send-full-status", action="store_true", default="null", help="Send all of the previous status to the reposerver")
 
             # Parse arguments
             args, unknown = parser.parse_known_args()
+
+            # If unknown arguments are passed
+            # if unknown:
+            #     raise Exception('unknown argument(s): ' + str(unknown))
             
         except Exception as e:
             raise Exception('error while parsing arguments: ' + str(e))
@@ -221,6 +225,14 @@ class Args:
                 self.statusController.sendPackagesStatus()
                 self.exitController.cleanExit()
 
+            # 
+            # If --send-full-history param has been set
+            #
+            if args.send_full_history != "null" and args.send_full_history:
+                # Send full history
+                self.statusController.sendFullHistory()
+                self.exitController.cleanExit()
+
             #
             # If --send-full-status param has been set
             #
@@ -228,6 +240,7 @@ class Args:
                 # Send full status including general status, available packages status, installed packages status and full history
                 self.statusController.sendGeneralStatus()
                 self.statusController.sendPackagesStatus()
-
+                self.exitController.cleanExit()
+    
         except Exception as e:
             raise Exception(str(e))

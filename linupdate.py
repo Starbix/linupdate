@@ -68,8 +68,6 @@ def main():
             # Print Logo
             my_app.printLogo()
 
-            my_exit.cleanExit(exit_code, logsdir + '/' + logfile) # toto
-
             # Exit if the user is not root
             if not my_system.isRoot():
                 print(Fore.YELLOW + 'Must be executed with sudo' + Style.RESET_ALL)

@@ -123,7 +123,7 @@ class Package:
             return self.myPackageManagerController.getAvailablePackages()
 
         except Exception as e:
-            raise Exception('error while getting available packages: ' + str(e))
+            raise Exception('error while retrieving available packages: ' + str(e))
     
 
     #-------------------------------------------------------------------------------------------------------------------
@@ -208,6 +208,8 @@ class Package:
                 # Quit if the answer is not 'y'
                 if answer.lower() != 'y':
                     print(Fore.YELLOW + ' Cancelled' + Style.RESET_ALL)
+
+                    # Do not cleanExit to avoid sending an email report
                     exit(1)
 
             print('\n Updating packages...')

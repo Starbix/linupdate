@@ -48,7 +48,6 @@ class Args:
     #   Parse arguments
     #
     #-------------------------------------------------------------------------------------------------------------------
-    # TODO: écrire le help de chaque argument
     def parse(self):
         # Default values
         Args.verbosity = False
@@ -56,7 +55,7 @@ class Args:
         Args.check_updates = False
         Args.ignore_exclude = False
         Args.dist_upgrade = False
-        Args.keep_oldconf = True # TODO peut être abandonner ce paramètre et le mettre à True tout le temps
+        Args.keep_oldconf = True
 
         myApp       = App()
         myAppConfig = Config()
@@ -70,50 +69,54 @@ class Args:
             # Define valid arguments
 
             # Version
-            parser.add_argument("-V", "--version", action="store_true", default="null", help="show program version")
+            parser.add_argument("-V", "--version", action="store_true", default="null", help="Show version")
             # Verbosity
-            parser.add_argument("-v", "--verbosity", action="store_true", default="null", help="increase output verbosity")
+            parser.add_argument("-v", "--verbosity", action="store_true", default="null", help="Increase verbosity")
             # Force / assume-yes
-            parser.add_argument("-y", "--assume-yes", action="store_true", default="null", help="assume yes")
+            parser.add_argument("-y", "--assume-yes", action="store_true", default="null", help="Answer yes to all questions")
             # Check updates
-            parser.add_argument("--check-updates", action="store_true", default="null", help="check updates")
+            parser.add_argument("-cu", "--check-updates", action="store_true", default="null", help="Only check for updates and exit")
             # Ignore exclude
-            parser.add_argument("--ignore-exclude", action="store_true", default="null", help="ignore-exclude")
+            parser.add_argument("-ie", "--ignore-exclude", action="store_true", default="null", help="Ignore all package exclusions")
 
             # Profile
-            parser.add_argument("--profile", action="store", nargs='?', default="null", help="profile")
+            parser.add_argument("-p", "--profile", action="store", nargs='?', default="null", help="Print current profile or set profile")
             # Environment
-            parser.add_argument("--env", action="store", nargs='?', default="null", help="environment")
+            parser.add_argument("-e", "--env", action="store", nargs='?', default="null", help="Print current environment or set environment")
             
             # Dist upgrade
-            parser.add_argument("--dist-upgrade", action="store_true", default="null", help="dist-upgrade")
+            parser.add_argument("-du", "--dist-upgrade", action="store_true", default="null", help="Perform a distribution upgrade (Debian based OS only)")
             # Keep oldconf
-            parser.add_argument("--keep-oldconf", action="store_true", default="null", help="keep-oldconf")
+            parser.add_argument("--keep-oldconf", action="store_true", default="null", help="Keep old configuration files during package update (Debian based OS only)")
 
             # Get excluded packages
-            parser.add_argument("--get-exclude", action="store", nargs='?', default="null", help="Get excluded packages")
+            parser.add_argument("--get-exclude", action="store", nargs='?', default="null", help="Get the list of packages to exclude from update")
             # Get excluded packages on major update
-            parser.add_argument("--get-exclude-major", action="store", nargs='?', default="null", help="Get excluded packages on major update")
+            parser.add_argument("--get-exclude-major", action="store", nargs='?', default="null", help="Get the list of packages to exclude from update (if package has a major version update)")
             # Get services to restart after package update
-            parser.add_argument("--get-service-restart", action="store", nargs='?', default="null", help="Get services to restart")
+            parser.add_argument("--get-service-restart", action="store", nargs='?', default="null", help="Get the list of services to restart after package update")
             # Exclude
-            parser.add_argument("--exclude", action="store", nargs='?', default="null", help="exclude packages")
+            parser.add_argument("--exclude", action="store", nargs='?', default="null", help="Set packages to exclude from update")
             # Exclude on major update
-            parser.add_argument("--exclude-major", action="store", nargs='?', default="null", help="exclude packages on major update")
+            parser.add_argument("--exclude-major", action="store", nargs='?', default="null", help="Set packages to exclude from update (if package has a major version update)")
             # Services to restart after package update
-            parser.add_argument("--service-restart", action="store", nargs='?', default="null", help="restart services")
+            parser.add_argument("--service-restart", action="store", nargs='?', default="null", help="Set services to restart after package update")
 
             # List modules
-            parser.add_argument("--mod-list", action="store_true", default="null", help="")
+            parser.add_argument("--mod-list", action="store_true", default="null", help="List available modules")
             # Module enable
-            parser.add_argument("--mod-enable", action="store", nargs='?', default="null", help="enable module")
+            parser.add_argument("--mod-enable", action="store", nargs='?', default="null", help="Enable module")
             # Module disable
-            parser.add_argument("--mod-disable", action="store", nargs='?', default="null", help="disable module")
+            parser.add_argument("--mod-disable", action="store", nargs='?', default="null", help="Disable module")
             # Module configure
-            parser.add_argument("--mod-configure", action="store", nargs='?', default="null", help="configure module")
+            parser.add_argument("--mod-configure", action="store", nargs='?', default="null", help="Configure module")
 
             # Parse arguments
             args, unknown = parser.parse_known_args()
+
+            # If unknown arguments are passed
+            # if unknown:
+            #     raise Exception('unknown argument(s): ' + str(unknown))
 
         except Exception as e:
             raise Exception('Error while parsing arguments: ' + str(e))

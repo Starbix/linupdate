@@ -38,6 +38,7 @@ class Mail():
             # Encode to bytes
             bs = attachment.encode('utf-8')
 
+            # TODO à terminer / tester
             msg.add_attachment(bs, maintype='application', subtype='json', filename='test.json')
 
 
