@@ -46,9 +46,9 @@ class Args:
             parser.add_argument("--ip", action="store", nargs='?', default="null", help="Specify an alternative local IP address to use to authenticate to the reposerver")
         
             # Allow configuration update
-            parser.add_argument("--allow-conf-update", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--allow-conf-update", action="store", nargs='?', default="null", help="Allow updating local configuration with reposerver configuration")
             # Allow repos update
-            parser.add_argument("--allow-repos-update", action="store", nargs='?', default="null", help="")
+            parser.add_argument("--allow-repos-update", action="store", nargs='?', default="null", help="Allow updating local repositories configuration with reposerver repositories configuration")
 
             # Agent enable
             parser.add_argument("--agent-enable", action="store", nargs='?', default="null", help="Enable reposerver module agent. This agent will regularly send informations about this host to reposerver (global informations, packages informations...)")
