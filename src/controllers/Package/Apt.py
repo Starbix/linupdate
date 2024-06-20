@@ -5,13 +5,11 @@ import apt
 import subprocess
 import glob
 import os
-from colorama import Fore, Back, Style
+import re
+from colorama import Fore, Style
 
 class Apt:
     def __init__(self):
-        # Unhold all packages
-        # self.unholdAll()
-
         # Create an instance of the apt cache
         self.aptcache = apt.Cache()
 
@@ -241,3 +239,251 @@ class Apt:
             raise Exception('could not get apt history log files: ' + str(e))
 
         return files
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Parse all apt history log files and return a list of events (JSON)
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def parse_history(self, history_files: list, entries_limit: int):
+        # Initialize a limit counter which will be incremented until it reaches the entries_limit
+        limit_counter = 0
+
+        # Initialize a list of events
+        events = []
+
+        # Parse each apt history files
+        for history_file in history_files:
+            # Retrieve all Start-Date in the history file
+            result = subprocess.run(
+                ['zgrep "^Start-Date:*" ' + history_file],
+                capture_output = True,
+                text = True,
+                shell = True
+            )
+
+            # Quit if an error occurred
+            if result.returncode != 0:
+                raise Exception('could not retrieve Start-Date from ' + history_file + ': ' + result.stderr)
+
+            # Split the result into a list
+            start_dates = result.stdout.strip().split('\n')
+
+            # TODO : peut être pas utile finalement
+            # ignore_start_date = ''
+
+            for start_date in start_dates:
+                # Reset all variables for each event
+                installed_packages = ''
+                upgraded_packages = ''
+                removed_packages = ''
+                purged_packages = ''
+                downgraded_packages = ''
+                reinstalled_packages = ''
+                installed_packages_json = ''
+                upgraded_packages_json = ''
+                removed_packages_json = ''
+                purged_packages_json = ''
+                downgraded_packages_json = ''
+                reinstalled_packages_json = ''
+
+                # Quit if the limit of entries to send has been reached
+                if limit_counter > entries_limit:
+                    break
+
+                # Ignore this entry if it has the same Start-Date as the previous one
+                # TODO : peut être pas utile finalement
+                # if start_date == ignore_start_date:
+                #     continue
+
+                # TODO : peut être pas utile finalement
+                # Before starting to parse, we check if there were not multiple events at the same date in the history file
+                # result = subprocess.run(
+                #     ['zgrep "' + start_date + '" ' + history_file + ' | wc -l'],
+                #     capture_output = True,
+                #     text = True,
+                #     shell = True
+                # )
+
+                # if result.returncode != 0:
+                #     raise Exception('could not count events for ' + start_date + ' in ' + history_file + ': ' + result.stderr)
+                
+                # count_event = int(result.stdout.strip())
+                # TODO : on met en dur car peut être pas utile finalement
+                count_event = 1
+
+                # If there is only one event, we can parse it
+                if count_event == 1:
+                    # Retrieve the event block : from the start date (START_DATE) to the next empty line
+                    # If the file is compressed, we must use zcat to read it
+                    if history_file.endswith('.gz'):
+                        result = subprocess.run(
+                            ['zcat ' + history_file + ' | sed -n "/' + start_date + '/,/^$/p"'],
+                            capture_output = True,
+                            text = True,
+                            shell = True
+                        )
+
+                    # If the file is not compressed, we can use sed directly
+                    else:
+                        result = subprocess.run(
+                            ['sed -n "/' + start_date + '/,/^$/p" ' + history_file],
+                            capture_output = True,
+                            text = True,
+                            shell = True
+                        )
+
+                    if result.returncode != 0:
+                        raise Exception('could not retrieve event for ' + start_date + ' in ' + history_file + ': ' + result.stderr)
+
+                    # Retrieve event block lines
+                    event = result.stdout.strip()
+
+                    # From the retrieved event block, we can get the start date and time and the end date and time
+                    date_start = re.search(r'^Start-Date: (.+)', event).group(1).split()[0].strip()
+                    time_start = re.search(r'^Start-Date: (.+)', event).group(1).split()[1].strip()
+                    date_end = re.search(r'End-Date: (.+)', event).group(1).split()[0].strip()
+                    time_end = re.search(r'End-Date: (.+)', event).group(1).split()[1].strip()
+
+                    # Retrieve the event command
+                    command = re.search(r'Commandline: (.+)', event).group(1).strip()
+
+                    # Retrieve packages installed, removed, upgraded, downgraded, etc.
+                    if re.search(r'Install: (.+)', event):
+                        installed_packages = re.search(r'Install: (.+)', event).group(1).strip()
+                    if re.search(r'Upgrade: (.+)', event):
+                        upgraded_packages = re.search(r'Upgrade: (.+)', event).group(1).strip()
+                    if re.search(r'Remove: (.+)', event):
+                        removed_packages = re.search(r'Remove: (.+)', event).group(1).strip()
+                    if re.search(r'Purge: (.+)', event):
+                        purged_packages = re.search(r'Purge: (.+)', event).group(1).strip()
+                    if re.search(r'Downgrade: (.+)', event):
+                        downgraded_packages = re.search(r'Downgrade: (.+)', event).group(1).strip()
+                    if re.search(r'Reinstall: (.+)', event):
+                        reinstalled_packages = re.search(r'Reinstall: (.+)', event).group(1).strip()
+
+                    # TODO debug
+                    # print('\n\n' + event + '\n')
+                    # print(date_start)
+                    # print(time_start)
+                    # print(date_end)
+                    # print(time_end)
+                    # print(command)
+   
+                # TODO : peut être pas utile finalement
+                # if count_event > 1:
+                #     temporary_file = '/tmp/apt_history_temporary_file'
+
+                    # Retrieve all events with the same date into a signle temporary file
+
+
+
+                    # Finally, since we have processed multiple same events from the log file, we ignore all the next events that would be at the same date (so that they are not processed twice)
+                    # ignore_start_date = start_date
+
+
+                # Parse packages lists and convert them to JSON
+                if installed_packages != '':
+                    installed_packages_json = self.parse_packages_line_to_json(installed_packages, 'install')
+
+                if upgraded_packages != '':
+                    upgraded_packages_json = self.parse_packages_line_to_json(upgraded_packages, 'upgrade')
+
+                if removed_packages != '':
+                    removed_packages_json = self.parse_packages_line_to_json(removed_packages, 'remove')
+
+                if purged_packages != '':
+                    purged_packages_json = self.parse_packages_line_to_json(purged_packages, 'purge')
+
+                if downgraded_packages != '':
+                    downgraded_packages_json = self.parse_packages_line_to_json(downgraded_packages, 'downgrade')
+
+                if reinstalled_packages != '':
+                    reinstalled_packages_json = self.parse_packages_line_to_json(reinstalled_packages, 'reinstall')
+
+                event = {
+                    'date_start': date_start,
+                    'time_start': time_start,
+                    'date_end': date_end,
+                    'time_end': time_end,
+                    'command': command
+                }
+
+                if installed_packages_json != '':
+                    event['installed'] = installed_packages_json
+
+                if upgraded_packages_json != '':
+                    event['upgraded'] = upgraded_packages_json
+
+                if removed_packages_json != '':
+                    event['removed'] = removed_packages_json
+
+                if purged_packages_json != '':
+                    event['purged'] = purged_packages_json
+
+                if downgraded_packages_json != '':
+                    event['downgraded'] = downgraded_packages_json
+
+                if reinstalled_packages_json != '':
+                    event['reinstalled'] = reinstalled_packages_json
+
+                # Add the event to the list of events
+                events.append(event)
+
+                limit_counter += 1
+
+        return events
+
+
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Parse a string of one or multiple package(s) into a list of JSON objects
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def parse_packages_line_to_json(self, packages: str, action: str):
+        packages_json = []
+
+        # If there is more than one package on the same line
+        # e.g. 
+        # libc6-i386:amd64 (2.35-0ubuntu3.7, 2.35-0ubuntu3.8), libc6:amd64 (2.35-0ubuntu3.7, 2.35-0ubuntu3.8), libc6:i386 (2.35-0ubuntu3.7, 2.35-0ubuntu3.8), libc-dev-bin:amd64 (2.35-0ubuntu3.7, 2.35-0ubuntu3.8), libc6-dbg:amd64 (2.35-0ubuntu3.7, 2.35-0ubuntu3.8), libc6-dev:amd64 (2.35-0ubuntu3.7, 2.35-0ubuntu3.8)
+        if re.search(r"\),", packages):
+            # Split all the packages from the same line into a list
+            packages = re.sub(r"\),", "\n", packages).split('\n')
+        
+        # Else if there is only one package on the same line, just split the line into a list
+        else:
+            packages = packages.split('\n')
+
+        # For all packages in the list, retrieve the name and the version
+        for package in packages:
+            # First, remove extra spaces
+            package = package.strip()
+
+            # Then, split the package into name and version
+            name = package.split(' ')[0]
+
+            # Depending on the action, the version to retrieve is on a different position
+            if action == 'install' or action == 'remove' or action == 'purge' or action == 'reinstall':
+                version = package.split(' ')[1]
+            if action == 'upgrade' or action == 'downgrade':
+                version = package.split(' ')[2]
+
+            # Remove parenthesis, commas, colons and spaces from name and version
+            for char in ['(', ')', ',', ' ']:
+                name = name.replace(char, '')
+                version = version.replace(char, '')
+
+            # Also remove architecture from name
+            for arch in [':amd64', ':i386', ':all', ':arm64', ':armhf', ':armel', ':ppc64el', ':s390x', ':mips', ':mips64el', ':mipsel', ':powerpc', ':powerpcspe', ':riscv64', ':s390', ':sparc', ':sparc64']:
+                if arch in name:
+                    name = name.replace(arch, '')
+        
+            # Add the package to the list of packages
+            packages_json.append({
+                'name': name,
+                'version': version
+            })
+
+        # Return the list of packages as JSON
+        return packages_json

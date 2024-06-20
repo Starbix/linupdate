@@ -61,7 +61,7 @@ class Reposerver:
     def post(self, updateSummary):
         # Note: no need of try / except block here, as it is already handled in the Module pre() function
         
-        # TODO : à finir si pas fini
+        # TODO : à finir si d'autres actions sont nécessaires
 
         # Quit if there was no packages updates
         if updateSummary['update']['success']['count'] == 0:

@@ -189,7 +189,7 @@ class Args:
             #
             # If --get-server-conf param has been set
             #
-            if args.get_server_conf != "null" and args.get_server_conf:
+            if args.get_reposerver_conf != "null" and args.get_reposerver_conf:
                 # Get server configuration
                 self.configController.getReposerverConf()
                 self.exitController.cleanExit()

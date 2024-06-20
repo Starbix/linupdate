@@ -6,7 +6,6 @@ from constant import *
 # Import libraries
 from colorama import Fore, Back, Style
 import socket
-import subprocess
 
 # Import classes
 from src.controllers.System import System
@@ -243,8 +242,10 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def sendFullHistory(self, entries_limit: int = 999999):
-        # Initialize a limit counter which will be incremented until it reaches the entries_limit
-        limit_counter = 0
+        # Retrieve URL, ID and token
+        url = self.reposerverConfigController.getUrl()
+        id = self.reposerverConfigController.getId()
+        token = self.reposerverConfigController.getToken()
 
         # History parsing will start from the oldest to the newest
         history_order = 'oldest'
@@ -260,47 +261,36 @@ class Status:
 
         try:
             # Retrieve history Ids or files
-            items = self.packageController.get_history(history_order)
+            history_files = self.packageController.get_history(history_order)
         except Exception as e:
             self.updateRequestStatus('full-history-update', 'error')
             raise Exception('error while retrieving history: ' + str(e))
 
         # If there is no item (would be strange), exit
-        if len(items) == 0:
+        if len(history_files) == 0:
             print(' no history found')
+            self.updateRequestStatus('full-history-update', 'done')
             return
 
-        # Parse each apt history files
-        for item in items:
-            # Retrieve all Start-Date in the history file
-            result = subprocess.run(
-                ['zgrep "^Start-Date:*" ' + item],
-                capture_output = True,
-                text = True,
-                shell = True
-            )
+        # Parse history files / Ids
+        try:
+            events = {}
+            events['events'] = self.packageController.parse_history(history_files, entries_limit)
 
-            # Quit if an error occurred
-            if result.returncode != 0:
-                raise Exception('could not retrieve Start-Date from ' + item + ': ' + result.stderr)
+            # debug only: print pretty json
+            # import json
+            # r = json.dumps(events)
+            # json_object = json.loads(r)
+            # json_formatted_str = json.dumps(json_object, indent=2)
+            # print(json_formatted_str)
 
-            # Split the result into a list
-            start_dates = result.stdout.strip().split('\n')
+            self.updateRequestStatus('full-history-update', 'done')
+        except Exception as e:
+            # Raise an exception to set status to 'error'
+            self.updateRequestStatus('full-history-update', 'error')
+            raise Exception('could not parse packages history: ' + str(e))
 
-            for start_date in start_dates:
-                # Quit if the limit of entries to send has been reached
-                if limit_counter > entries_limit:
-                    break
-                
-                # On ignore cet évènement si celui-ci a le même Id (même date) que le précédent
-                # if [ ! -z "$IGNORE_EVENT" ] && [ "$IGNORE_EVENT" == "$START_DATE" ];then
-                #     continue
-                # fi
+        print(' ▪ Sending data to ' + Fore.YELLOW + url + Style.RESET_ALL + ':')
 
-                # TODO à terminer
-
-
-        self.updateRequestStatus('full-history-update', 'done')
-
-        
-
+        self.httpRequestController.quiet = False
+        self.httpRequestController.put(url + '/api/v2/host/packages/event', id, token, events)

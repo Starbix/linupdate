@@ -245,3 +245,8 @@ class Package:
     #-------------------------------------------------------------------------------------------------------------------
     def get_history(self, order):
         return self.myPackageManagerController.get_history(order)
+
+
+    def parse_history(self, history_files, entries_limit):
+        return self.myPackageManagerController.parse_history(history_files, entries_limit)
+
