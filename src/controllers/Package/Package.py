@@ -37,8 +37,9 @@ class Package:
     #-------------------------------------------------------------------------------------------------------------------
     def exclude(self, ignore_exclude):
         try:
-            # Unhold / unexclude all packages
-            self.myPackageManagerController.unholdAll()
+            # Unhold / unexclude all packages if function exists
+            if hasattr(self.myPackageManagerController, 'unholdAll'):
+                self.myPackageManagerController.unholdAll()
 
             # Create a new empty list of packages to update
             packagesToUpdateList = []
@@ -247,6 +248,10 @@ class Package:
         return self.myPackageManagerController.get_history(order)
 
 
-    def parse_history(self, history_files, entries_limit):
-        return self.myPackageManagerController.parse_history(history_files, entries_limit)
-
+    #-------------------------------------------------------------------------------------------------------------------
+    #
+    #   Parse history entries
+    #
+    #-------------------------------------------------------------------------------------------------------------------
+    def parse_history(self, entries, entries_limit):
+        return self.myPackageManagerController.parse_history(entries, entries_limit)

@@ -1,4 +1,12 @@
 # packages to install :
 
-apt install python3-tabulate
-apt install python3-colorama
+# deb :
+python3-tabulate
+python3-colorama
+python3-dateutil
+
+
+# rpm :
+python3-tabulate
+python3-colorama
+python3-dateutil

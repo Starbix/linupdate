@@ -104,8 +104,6 @@ class Status:
     #
     #-------------------------------------------------------------------------------------------------------------------
     def sendPackagesStatus(self):
-        rc = 0
-
         # Update Reposerver's request status, set it to 'running'
         self.updateRequestStatus('packages-status-update', 'running')
 
@@ -204,15 +202,9 @@ class Status:
                     name = package['name']
                     version = package['version']
 
-                    # Ignore package if name is empty
-                    if name == '':
+                    # Ignore package if name or version is empty
+                    if name == '' or version == '':
                         continue
-
-                    # Redhat only
-                    if self.systemController.getOsFamily() == 'Redhat':
-                        # Remove epoch if it is equal to 0
-                        if version.startswith('0:'):
-                            version = version[2:]
 
                     # Add package name, its available version to the installed_packages string
                     installed_packages += name + '|' + version + ','
@@ -261,13 +253,13 @@ class Status:
 
         try:
             # Retrieve history Ids or files
-            history_files = self.packageController.get_history(history_order)
+            history_entries = self.packageController.get_history(history_order)
         except Exception as e:
             self.updateRequestStatus('full-history-update', 'error')
             raise Exception('error while retrieving history: ' + str(e))
 
         # If there is no item (would be strange), exit
-        if len(history_files) == 0:
+        if len(history_entries) == 0:
             print(' no history found')
             self.updateRequestStatus('full-history-update', 'done')
             return
@@ -275,7 +267,7 @@ class Status:
         # Parse history files / Ids
         try:
             events = {}
-            events['events'] = self.packageController.parse_history(history_files, entries_limit)
+            events['events'] = self.packageController.parse_history(history_entries, entries_limit)
 
             # debug only: print pretty json
             # import json

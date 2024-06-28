@@ -44,12 +44,10 @@ class Apt:
             for pkg in self.aptcache:
                 # If the package is installed, add it to the list of installed packages
                 if pkg.is_installed:
-                    myPackage = {
+                    list.append({
                         'name': pkg.name,
                         'version': pkg.installed.version,
-                    }
-
-                    list.append(myPackage)
+                    })
             
             # Sort the list by package name
             list.sort(key=lambda x: x['name'])
@@ -362,14 +360,6 @@ class Apt:
                         downgraded_packages = re.search(r'Downgrade: (.+)', event).group(1).strip()
                     if re.search(r'Reinstall: (.+)', event):
                         reinstalled_packages = re.search(r'Reinstall: (.+)', event).group(1).strip()
-
-                    # TODO debug
-                    # print('\n\n' + event + '\n')
-                    # print(date_start)
-                    # print(time_start)
-                    # print(date_end)
-                    # print(time_end)
-                    # print(command)
    
                 # TODO : peut être pas utile finalement
                 # if count_event > 1:
@@ -402,6 +392,7 @@ class Apt:
                 if reinstalled_packages != '':
                     reinstalled_packages_json = self.parse_packages_line_to_json(reinstalled_packages, 'reinstall')
 
+                # Create the event JSON object
                 event = {
                     'date_start': date_start,
                     'time_start': time_start,
